@@ -32,16 +32,24 @@ function QRPassModal({ booking, onClose }) {
 // ── Booking Form ──────────────────────────────────────
 function BookingForm() {
   const TITLE = "Resource Booking Request";
-  const OPTIONS = [
-    ...EQUIPMENT.map(e => e.name),
-    "Training Run (A100)",
-    "Consultation - CV Methodology",
-    "Lab Space Access"
-  ];
-
-  // 1. Add state to track user input
+  const [options, setOptions] = useState(["Training Run (A100)", "Consultation - CV Methodology", "Lab Space Access"]);
   const [form, setForm] = useState({ resource: "", date: "", time: "", purpose: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Fetch live inventory from Neon DB
+  useEffect(() => {
+    const fetchResources = async () => {
+      try {
+        const response = await getItems();
+        const dbItems = response.data.map(item => item.name);
+        // Combine DB items with standard services
+        setOptions([...dbItems, "Training Run (A100)", "Consultation - CV Methodology", "Lab Space Access"]);
+      } catch (error) {
+        console.error("Failed to fetch dynamic resources:", error);
+      }
+    };
+    fetchResources();
+  }, []);
 
   // Helper to update state as they type
   const set = k => e => setForm(f => ({ ...f, [k]: e.target.value }));
@@ -83,7 +91,7 @@ function BookingForm() {
       <div style={{ background: T.white, border: `1px solid ${T.border}`, borderRadius: 3, padding: "1.75rem", maxWidth: 520 }}>
         
         {/* 3. Bind the fields to our state */}
-        <Field label="Resource / Type" value={form.resource} onChange={set("resource")} options={OPTIONS} />
+        <Field label="Resource / Type" value={form.resource} onChange={set("resource")} options={options} />
         <Field label="Preferred Date"  type="date" value={form.date} onChange={set("date")} />
         <Field label="Time Slot"       value={form.time} onChange={set("time")} options={["08:00–10:00","10:00–12:00","13:00–15:00","15:00–17:00","17:00–19:00"]} />
         <Field label="Purpose / Notes" rows={3}   value={form.purpose} onChange={set("purpose")} placeholder="Describe your intended use..." />
