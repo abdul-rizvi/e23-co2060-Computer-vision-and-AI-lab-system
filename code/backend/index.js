@@ -12,6 +12,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Health Check for Deployment
+app.get("/", (req, res) => res.send("CV & AI Lab API is running..."));
+
 // Import routes
 const inventoryRoutes = require("./routes/inventoryRoutes");
 const authRoutes = require("./routes/authRoutes");
@@ -28,8 +31,9 @@ const startServer = async () => {
         await pool.query("SELECT 1");
         console.log("Database connected successfully");
 
-        app.listen(process.env.PORT, () => {
-            console.log(`Server running on port ${process.env.PORT}`);
+        const PORT = process.env.PORT || 5000;
+        app.listen(PORT, () => {
+            console.log(`Server running on port ${PORT}`);
         });
 
     } catch (error) {
