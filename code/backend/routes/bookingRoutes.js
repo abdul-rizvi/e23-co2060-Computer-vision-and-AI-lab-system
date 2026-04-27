@@ -6,6 +6,6 @@ const { verifyToken, requireRole } = require("../middleware/authMiddleware");
 // Both routes require the user to be logged in
 router.post("/", verifyToken, createBooking);
 router.get("/", verifyToken, getBookings);
-router.put("/:id/status", verifyToken, requireRole("officer"), updateBookingStatus);
+router.put("/:id/status", verifyToken, requireRole("officer", "admin"), updateBookingStatus);
 
 module.exports = router;
