@@ -6,7 +6,7 @@ export function TopBar({ onLogin }) {
     <div style={{ background: T.navyDark, padding: ".42rem 0" }}>
       <div style={{ maxWidth: 1240, margin: "0 auto", padding: "0 1.5rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div style={{ display: "flex", alignItems: "center", gap: ".4rem" }}>
-          {["University of Peradeniya", "Faculty of Engineering", "Dept. of Computer Science"].map((l, i) => (
+          {["University of Peradeniya", "Faculty of Engineering", "Dept. of Computer Engineering"].map((l, i) => (
             <span key={l} style={{ display: "flex", alignItems: "center", gap: ".4rem" }}>
               {i > 0 && <span style={{ color: "#ffffff30" }}>|</span>}
               <a href="#" className="topbar-link">{l}</a>
