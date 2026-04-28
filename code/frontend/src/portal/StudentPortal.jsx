@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { T } from "../styles/theme";
 import { Badge, Field, PTable } from "../components/UI";
 import { EQUIPMENT } from "../data/labData";
-import { getBookings, createBooking } from "../services/api";
+import { getBookings, createBooking, getItems } from "../services/api";
 
 // ── QR Pass Modal ─────────────────────────────────────
 function QRPassModal({ booking, onClose }) {
