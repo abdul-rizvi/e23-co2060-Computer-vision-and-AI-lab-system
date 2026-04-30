@@ -132,4 +132,14 @@ export const GLOBAL_CSS = `
   .ra-card:hover { box-shadow: 0 8px 28px rgba(30,58,110,.14); transform: translateY(-3px); border-top-color: ${T.navyLight}; }
 
   .breadbar { background: ${T.offWhite}; border-bottom: 1px solid ${T.border}; padding: .5rem 0; font-size: .77rem; color: ${T.textLight}; }
+
+  /* Mobile Responsiveness */
+  @media (max-width: 768px) {
+    .portal-container { flex-direction: column !important; }
+    .portal-sidebar { width: 100% !important; min-height: auto !important; }
+    .portal-sidebar nav { display: flex; overflow-x: auto; padding-bottom: 0.5rem; }
+    .sb-btn { white-space: nowrap; border-left: none !important; border-bottom: 3px solid transparent; }
+    .sb-btn.active { border-bottom-color: ${T.gold} !important; }
+    .dtable { min-width: 650px; }
+  }
 `;

@@ -9,7 +9,7 @@ const ROLE_WHO   = { student: "Sarah Kim — PhD Candidate", staff: "Dr. Anika R
 // ── Portal Sidebar ────────────────────────────────────
 export function PortalSidebar({ role, active, setActive, onLogout }) {
   return (
-    <div style={{ width: 232, flexShrink: 0, background: T.navyDark, minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+    <div className="portal-sidebar" style={{ width: 232, flexShrink: 0, background: T.navyDark, minHeight: "100vh", display: "flex", flexDirection: "column" }}>
 
       {/* Sidebar header */}
       <div style={{ background: T.navy, padding: "1rem 1.2rem", borderBottom: `2px solid ${T.gold}` }}>
