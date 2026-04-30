@@ -22,7 +22,7 @@ export function TopBar({ onLogin }) {
             onClick={onLogin}
             style={{ background: T.gold, color: T.white, border: "none", padding: "3px 12px", borderRadius: 2, fontSize: ".71rem", fontWeight: 700 }}
           >
-            🔐 Portal Login
+            🔐 Sign In
           </button>
         </div>
       </div>
@@ -118,7 +118,7 @@ export function Footer() {
               </div>
             </div>
             <p style={{ color: "#8faac0", fontSize: ".79rem", lineHeight: 1.7, marginBottom: "1rem" }}>
-              Dept. of Computer Science, Faculty of Engineering. Advancing visual intelligence through research, innovation, and collaboration.
+              Dept. of Computer Engineering, Faculty of Engineering. Advancing visual intelligence through research, innovation, and collaboration.
             </p>
             <div style={{ display: "flex", gap: ".5rem", flexWrap: "wrap" }}>
               {["LinkedIn","GitHub","Google Scholar","ResearchGate"].map(s => (

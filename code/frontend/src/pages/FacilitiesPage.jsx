@@ -25,7 +25,7 @@ export function FacilitiesPage({ setShowBooking }) {
             <div style={{ color: T.textMid, fontSize: ".82rem", marginBottom: ".35rem" }}>{eq.spec}</div>
             <div style={{ color: T.textLight, fontSize: ".75rem", marginBottom: "1rem" }}>Category: {eq.cat} · Fee: {eq.fee}</div>
             <button onClick={() => setShowBooking(true)} className="btn-outline" style={{ width: "100%", fontSize: ".8rem" }}>
-              {eq.avail ? "Reserve Now" : "Join Waitlist"}
+              {eq.avail ? "Book Now" : "Join Waitlist"}
             </button>
           </div>
         ))}
