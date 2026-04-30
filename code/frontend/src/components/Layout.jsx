@@ -40,7 +40,7 @@ export function LogoBar() {
         </div>
         <div>
           <div style={{ color: T.gold, fontSize: ".67rem", fontWeight: 700, letterSpacing: ".14em", textTransform: "uppercase" }}>
-            Dept. of Computer Science · Faculty of Engineering
+            Dept. of Computer Engineering · Faculty of Engineering
           </div>
           <div style={{ color: T.white, fontFamily: "'Noto Serif',serif", fontSize: "1.3rem", fontWeight: 700, lineHeight: 1.2 }}>
             AI & Computer Vision Laboratory
