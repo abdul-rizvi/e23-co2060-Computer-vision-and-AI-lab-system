@@ -99,7 +99,7 @@ export default function App() {
   // ── PORTAL VIEW ──────────────────────────────────────
   if (userRole) {
     return (
-      <div style={{ display: "flex", minHeight: "100vh", background: "#f4f6f9" }}>
+      <div className="portal-container" style={{ display: "flex", minHeight: "100vh", background: "#f4f6f9" }}>
         <style>{GLOBAL_CSS}</style>
 
         <PortalSidebar
