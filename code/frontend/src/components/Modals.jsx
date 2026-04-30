@@ -121,8 +121,6 @@ export function BookingModal({ onClose }) {
 
 // ── Login Modal ───────────────────────────────────────
 export function LoginModal({ onLogin, onClose, onSwitchToRegister }) {
-  const [displayRole, setDisplayRole] = useState("student");
-  
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -175,22 +173,6 @@ export function LoginModal({ onLogin, onClose, onSwitchToRegister }) {
         </div>
 
         <div style={{ padding: "1.75rem" }}>
-          {/* Role selector */}
-          <div style={{ marginBottom: "1.25rem" }}>
-            <label className="inp-label">Login As</label>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: ".5rem", marginTop: ".35rem" }}>
-              {[["student","Student"],["staff","Staff"],["admin","Lab Admin"]].map(([v, l]) => (
-                <button
-                  key={v}
-                  onClick={() => setDisplayRole(v)}
-                  style={{ padding: ".5rem", border: `1.5px solid ${displayRole === v ? T.navy : T.border}`, background: displayRole === v ? T.navy : "transparent", color: displayRole === v ? T.white : T.textMid, borderRadius: 3, fontWeight: 600, fontSize: ".81rem" }}
-                >
-                  {l}
-                </button>
-              ))}
-            </div>
-          </div>
-
           {error && (
             <div style={{ padding: "10px", marginBottom: "15px", background: "#fee2e2", color: "#991b1b", border: "1px solid #f87171", borderRadius: "3px", fontSize: "0.85rem", textAlign: "center" }}>
               {error}
