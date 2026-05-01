@@ -20,6 +20,7 @@ export const loginUser = (data) => API.post("/api/auth/login", data);
 export const getItems = () => API.get("/api/items");
 export const createItem = (data) => API.post("/api/items", data);
 export const deleteItem = (id) => API.delete(`/api/items/${id}`);
+export const updateItem = (id, data) => API.put(`/api/items/${id}`, data);
 
 // booking APIs
 export const createBooking = (data) => API.post("/api/bookings", data);
