@@ -10,13 +10,14 @@ import { loginUser, registerUser, createBooking } from "../services/api";
 export function BookingModal({ onClose }) {
   const [step, setStep] = useState(1);
   const [form, setForm] = useState({ type: "", resource: "", date: "", time: "", purpose: "" });
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false); //loading state for submission
 
   const set = k => e => setForm(f => ({ ...f, [k]: e.target.value }));
 
   const canProceed1 = form.type && form.resource;
   const canProceed2 = form.date && form.time;
 
+  // The function that sends the booking to your Express backend
   const handleSubmitBooking = async () => {
     try {
       setIsSubmitting(true);
@@ -28,7 +29,7 @@ export function BookingModal({ onClose }) {
         purpose: form.purpose
       });
       alert("Success! Your booking request has been sent for admin approval.");
-      onClose();
+      onClose(); // Close the modal on success
     } catch (error) {
       console.error("Booking error:", error);
       alert("Failed to submit the booking request. Please check the console.");
@@ -100,6 +101,8 @@ export function BookingModal({ onClose }) {
               </div>
               <div style={{ display: "flex", gap: ".75rem" }}>
                 <button onClick={() => setStep(2)} className="btn-outline" style={{ flex: 1 }} disabled={isSubmitting}>← Back</button>
+
+                {/* Updated Submit Button */}
                 <button 
                   onClick={handleSubmitBooking} 
                   disabled={isSubmitting}
@@ -135,9 +138,11 @@ export function LoginModal({ onLogin, onClose, onSwitchToRegister }) {
 
       const response = await loginUser({ email, password });
 
+      // Save token and user to local storage
       localStorage.setItem("token", response.data.token);
       localStorage.setItem("user", JSON.stringify(response.data.user));
 
+      // Translate backend "officer" to frontend "admin" so the UI menus don't break
       const backendRole = response.data.user.role;
       const frontendRole = backendRole === "officer" ? "admin" : backendRole;
       
