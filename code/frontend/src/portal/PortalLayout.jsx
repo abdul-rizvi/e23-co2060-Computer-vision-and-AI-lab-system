@@ -3,8 +3,27 @@ import { PORTAL_MENUS } from "../data/labData";
 
 const ROLE_LABEL = { student: "Student Portal", staff: "Staff Portal", admin: "Admin Portal" };
 const ROLE_COLOR = { student: "#3b82f6", staff: T.green, admin: T.gold };
-const ROLE_INI   = { student: "SK", staff: "AR", admin: "AD" };
-const ROLE_WHO   = { student: "Sarah Kim — PhD Candidate", staff: "Dr. Anika Reyes — Senior Staff", admin: "Lab Administrator" };
+
+// ── Helper: get user from localStorage ───────────────
+function getStoredUser() {
+  try {
+    const raw = localStorage.getItem("user");
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+// ── Helper: generate initials from full name ──────────
+function getInitials(name) {
+  if (!name) return "?";
+  return name
+    .trim()
+    .split(/\s+/)
+    .map(part => part[0].toUpperCase())
+    .slice(0, 2)
+    .join("");
+}
 
 // ── Portal Sidebar ────────────────────────────────────
 export function PortalSidebar({ role, active, setActive, onLogout }) {
@@ -50,15 +69,19 @@ export function PortalSidebar({ role, active, setActive, onLogout }) {
 
 // ── Portal Top Header Bar ─────────────────────────────
 export function PortalHeader({ role }) {
+  const user = getStoredUser();
+  const fullName = user?.name || "Unknown User";
+  const initials = getInitials(fullName);
+
   return (
     <div style={{ background: T.white, borderBottom: `3px solid ${T.gold}`, padding: ".72rem 1.5rem", display: "flex", justifyContent: "space-between", alignItems: "center", flexShrink: 0 }}>
       <div style={{ fontSize: ".77rem", color: T.textLight }}>
         <span style={{ fontWeight: 700, color: T.navy }}>CV & AI Laboratory</span> · Internal Management System
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: ".75rem" }}>
-        <span style={{ fontSize: ".77rem", color: T.textMid }}>{ROLE_WHO[role]}</span>
+        <span style={{ fontSize: ".77rem", color: T.textMid }}>{fullName}</span>
         <div style={{ width: 32, height: 32, borderRadius: "50%", background: T.navy, color: T.white, display: "flex", alignItems: "center", justifyContent: "center", fontSize: ".74rem", fontWeight: 700 }}>
-          {ROLE_INI[role]}
+          {initials}
         </div>
       </div>
     </div>
