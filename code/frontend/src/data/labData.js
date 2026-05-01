@@ -80,8 +80,8 @@ export const TICKER_ITEMS = [
 
 export const PORTAL_MENUS = {
   student: [
-    { id:"booking", icon:"📷", label:"Book Resource" },
     { id:"history", icon:"📋", label:"My Bookings"   },
+    { id:"booking", icon:"📷", label:"Book Resource" },
   ],
   staff: [
   ],

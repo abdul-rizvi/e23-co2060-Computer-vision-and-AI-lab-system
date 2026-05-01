@@ -153,7 +153,6 @@ function UsageHistory() {
 // ── Main Student Portal ───────────────────────────────
 export function StudentPortal({ active }) {
   if (active === "booking") return <BookingForm />;
-  if (active === "history") return <UsageHistory />;
-
-  return <div style={{ padding: "2rem", color: T.textMid, fontSize: ".87rem" }}>Select a section from the sidebar.</div>;
+  // Default to My Bookings (also handles active === "history")
+  return <UsageHistory />;
 }

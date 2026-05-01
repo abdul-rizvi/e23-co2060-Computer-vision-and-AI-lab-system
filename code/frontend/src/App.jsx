@@ -77,6 +77,8 @@ export default function App() {
         // Translate "officer" back to "admin" for the frontend menus
         const role = parsedUser.role === "officer" ? "admin" : parsedUser.role;
         setUserRole(role);
+        // Students land on My Bookings by default
+        if (role === "student") setPortalTab("history");
       } catch (error) {
         console.error("Failed to restore session", error);
       }
@@ -85,7 +87,8 @@ export default function App() {
 
   const handleLogin  = useCallback(role => {
     setUserRole(role);
-    setPortalTab("dashboard");
+    // Students land on My Bookings by default
+    setPortalTab(role === "student" ? "history" : "dashboard");
     setShowLogin(false);
   }, []);
 
