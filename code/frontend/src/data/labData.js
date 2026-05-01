@@ -86,7 +86,7 @@ export const PORTAL_MENUS = {
   staff: [
   ],
   admin: [
-    { id:"equip-mgmt",   icon:"🛠️", label:"Equipment Management"   },
     { id:"reservations", icon:"📅", label:"Reservation Approval"    },
+    { id:"equip-mgmt",   icon:"🛠️", label:"Equipment Management"   },
   ],
 };
