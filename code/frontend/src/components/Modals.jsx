@@ -208,6 +208,11 @@ export function RegisterModal({ onSuccess, onClose, onSwitchToLogin }) {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  // Press Enter from any field to trigger registration
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") handleRegister();
+  };
+
   const handleRegister = async () => {
     if (!name || !email || !password || !confirmPassword) {
       setError("Please fill in all fields.");
@@ -286,10 +291,10 @@ export function RegisterModal({ onSuccess, onClose, onSwitchToLogin }) {
             </div>
           )}
 
-          <Field label="Full Name"        type="text"     placeholder="John Doe"      value={name}            onChange={(e) => setName(e.target.value)} />
-          <Field label="University Email" type="email"    placeholder="id@pdn.ac.lk"  value={email}           onChange={(e) => setEmail(e.target.value)} />
-          <Field label="Password"         type="password" placeholder="••••••••"      value={password}        onChange={(e) => setPassword(e.target.value)} />
-          <Field label="Confirm Password" type="password" placeholder="••••••••"      value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleRegister()} />
+          <Field label="Full Name"        type="text"     placeholder="John Doe"      value={name}            onChange={(e) => setName(e.target.value)}            onKeyDown={handleKeyDown} />
+          <Field label="University Email" type="email"    placeholder="id@pdn.ac.lk"  value={email}           onChange={(e) => setEmail(e.target.value)}           onKeyDown={handleKeyDown} />
+          <Field label="Password"         type="password" placeholder="••••••••"      value={password}        onChange={(e) => setPassword(e.target.value)}        onKeyDown={handleKeyDown} />
+          <Field label="Confirm Password" type="password" placeholder="••••••••"      value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} onKeyDown={handleKeyDown} />
 
           <button onClick={handleRegister} disabled={isLoading} className="btn-navy" style={{ width: "100%", padding: ".7rem", fontSize: ".9rem", background: T.green, opacity: isLoading ? 0.7 : 1 }}>
             {isLoading ? "Creating account..." : "Create Account"}
