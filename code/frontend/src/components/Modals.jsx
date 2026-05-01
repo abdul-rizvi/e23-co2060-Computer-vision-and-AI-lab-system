@@ -10,14 +10,13 @@ import { loginUser, registerUser, createBooking } from "../services/api";
 export function BookingModal({ onClose }) {
   const [step, setStep] = useState(1);
   const [form, setForm] = useState({ type: "", resource: "", date: "", time: "", purpose: "" });
-  const [isSubmitting, setIsSubmitting] = useState(false); // Loading state for submission
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const set = k => e => setForm(f => ({ ...f, [k]: e.target.value }));
 
   const canProceed1 = form.type && form.resource;
   const canProceed2 = form.date && form.time;
 
-  // The function that sends the booking to your Express backend
   const handleSubmitBooking = async () => {
     try {
       setIsSubmitting(true);
@@ -29,7 +28,7 @@ export function BookingModal({ onClose }) {
         purpose: form.purpose
       });
       alert("Success! Your booking request has been sent for admin approval.");
-      onClose(); // Close the modal on success
+      onClose();
     } catch (error) {
       console.error("Booking error:", error);
       alert("Failed to submit the booking request. Please check the console.");
@@ -101,8 +100,6 @@ export function BookingModal({ onClose }) {
               </div>
               <div style={{ display: "flex", gap: ".75rem" }}>
                 <button onClick={() => setStep(2)} className="btn-outline" style={{ flex: 1 }} disabled={isSubmitting}>← Back</button>
-                
-                {/* Updated Submit Button */}
                 <button 
                   onClick={handleSubmitBooking} 
                   disabled={isSubmitting}
@@ -138,11 +135,9 @@ export function LoginModal({ onLogin, onClose, onSwitchToRegister }) {
 
       const response = await loginUser({ email, password });
 
-      // Save token and user to local storage
       localStorage.setItem("token", response.data.token);
       localStorage.setItem("user", JSON.stringify(response.data.user));
 
-      // Translate backend "officer" to frontend "admin" so the UI menus don't break
       const backendRole = response.data.user.role;
       const frontendRole = backendRole === "officer" ? "admin" : backendRole;
       
@@ -158,6 +153,11 @@ export function LoginModal({ onLogin, onClose, onSwitchToRegister }) {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Press Enter from any field to trigger sign in
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") handleSignIn();
   };
 
   return (
@@ -179,8 +179,8 @@ export function LoginModal({ onLogin, onClose, onSwitchToRegister }) {
             </div>
           )}
 
-          <Field label="University Email" type="email"    placeholder="id@pdn.ac.lk" value={email} onChange={(e) => setEmail(e.target.value)} />
-          <Field label="Password"         type="password" placeholder="••••••••"      value={password} onChange={(e) => setPassword(e.target.value)} />
+          <Field label="University Email" type="email"    placeholder="id@pdn.ac.lk" value={email}    onChange={(e) => setEmail(e.target.value)}    onKeyDown={handleKeyDown} />
+          <Field label="Password"         type="password" placeholder="••••••••"      value={password} onChange={(e) => setPassword(e.target.value)} onKeyDown={handleKeyDown} />
 
           <button onClick={handleSignIn} disabled={isLoading} className="btn-navy" style={{ width: "100%", padding: ".7rem", fontSize: ".9rem", opacity: isLoading ? 0.7 : 1 }}>
             {isLoading ? "Verifying..." : "Sign In to Portal"}
@@ -209,7 +209,6 @@ export function RegisterModal({ onSuccess, onClose, onSwitchToLogin }) {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleRegister = async () => {
-    // Validation
     if (!name || !email || !password || !confirmPassword) {
       setError("Please fill in all fields.");
       return;
@@ -236,10 +235,9 @@ export function RegisterModal({ onSuccess, onClose, onSwitchToLogin }) {
 
       const response = await registerUser({ name, email, password, role });
 
-      // After successful registration, show message and switch to login
       alert("Registration successful! Please log in with your credentials.");
-      onSuccess(); // Close the register modal
-      if (onSwitchToLogin) onSwitchToLogin(); // Switch back to login
+      onSuccess();
+      if (onSwitchToLogin) onSwitchToLogin();
 
     } catch (err) {
       console.error("Registration failed:", err);
@@ -288,10 +286,10 @@ export function RegisterModal({ onSuccess, onClose, onSwitchToLogin }) {
             </div>
           )}
 
-          <Field label="Full Name"              type="text"     placeholder="John Doe"        value={name}             onChange={(e) => setName(e.target.value)} />
-          <Field label="University Email"       type="email"    placeholder="id@pdn.ac.lk"   value={email}            onChange={(e) => setEmail(e.target.value)} />
-          <Field label="Password"               type="password" placeholder="••••••••"       value={password}         onChange={(e) => setPassword(e.target.value)} />
-          <Field label="Confirm Password"       type="password" placeholder="••••••••"       value={confirmPassword}   onChange={(e) => setConfirmPassword(e.target.value)} />
+          <Field label="Full Name"        type="text"     placeholder="John Doe"      value={name}            onChange={(e) => setName(e.target.value)} />
+          <Field label="University Email" type="email"    placeholder="id@pdn.ac.lk"  value={email}           onChange={(e) => setEmail(e.target.value)} />
+          <Field label="Password"         type="password" placeholder="••••••••"      value={password}        onChange={(e) => setPassword(e.target.value)} />
+          <Field label="Confirm Password" type="password" placeholder="••••••••"      value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleRegister()} />
 
           <button onClick={handleRegister} disabled={isLoading} className="btn-navy" style={{ width: "100%", padding: ".7rem", fontSize: ".9rem", background: T.green, opacity: isLoading ? 0.7 : 1 }}>
             {isLoading ? "Creating account..." : "Create Account"}

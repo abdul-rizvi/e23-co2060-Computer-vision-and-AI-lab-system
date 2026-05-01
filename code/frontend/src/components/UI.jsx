@@ -18,7 +18,7 @@ export function Badge({ label, color }) {
 }
 
 // ── Form Field ────────────────────────────────────────
-export function Field({ label, type = "text", value, onChange, options, rows, placeholder }) {
+export function Field({ label, type = "text", value, onChange, onKeyDown, options, rows, placeholder }) {
   const s = {
     width: "100%", padding: ".55rem .8rem",
     border: `1px solid ${T.border}`, borderRadius: 3,
@@ -28,14 +28,14 @@ export function Field({ label, type = "text", value, onChange, options, rows, pl
     <div style={{ marginBottom: ".9rem" }}>
       {label && <label className="inp-label">{label}</label>}
       {options ? (
-        <select value={value} onChange={onChange} style={s}>
+        <select value={value} onChange={onChange} onKeyDown={onKeyDown} style={s}>
           <option value="">-- Select --</option>
           {options.map(o => <option key={o}>{o}</option>)}
         </select>
       ) : rows ? (
-        <textarea rows={rows} value={value} onChange={onChange} placeholder={placeholder} style={{ ...s, resize: "vertical" }} />
+        <textarea rows={rows} value={value} onChange={onChange} onKeyDown={onKeyDown} placeholder={placeholder} style={{ ...s, resize: "vertical" }} />
       ) : (
-        <input type={type} value={value} onChange={onChange} placeholder={placeholder} style={s} />
+        <input type={type} value={value} onChange={onChange} onKeyDown={onKeyDown} placeholder={placeholder} style={s} />
       )}
     </div>
   );
