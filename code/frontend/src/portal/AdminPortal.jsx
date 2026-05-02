@@ -154,8 +154,7 @@ function EquipmentManagement() {
 
 // ── Main Admin Portal ─────────────────────────────────
 export function AdminPortal({ active }) {
-  if (active === "reservations") return <ReservationApproval />;
-  if (active === "equip-mgmt")   return <EquipmentManagement />;
-
-  return <div style={{ padding: "2rem", color: T.textMid, fontSize: ".87rem" }}>Select a section from the sidebar.</div>;
+  if (active === "equip-mgmt") return <EquipmentManagement />;
+  // Default to Reservation Approval (also handles active === "reservations")
+  return <ReservationApproval />;
 }

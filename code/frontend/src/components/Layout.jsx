@@ -1,4 +1,5 @@
 import { T } from "../styles/theme";
+import labLogo from "../assets/lab-logo.png";
 
 // ── Top Utility Bar ───────────────────────────────────
 export function TopBar({ onLogin }) {
@@ -35,8 +36,8 @@ export function LogoBar() {
   return (
     <div style={{ background: T.navy, padding: ".85rem 1.5rem" }}>
       <div style={{ maxWidth: 1240, margin: "0 auto", display: "flex", alignItems: "center", gap: "1.25rem" }}>
-        <div style={{ width: 54, height: 54, borderRadius: "50%", background: T.white, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.6rem", flexShrink: 0 }}>
-          👁️
+        <div style={{ width: 60, height: 60, borderRadius: "50%", background: T.white, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, overflow: "hidden" }}>
+          <img src={labLogo} alt="CV & AI Lab Logo" style={{ width: 59, height: 59, objectFit: "cover" }} />
         </div>
         <div>
           <div style={{ color: T.gold, fontSize: ".67rem", fontWeight: 700, letterSpacing: ".14em", textTransform: "uppercase" }}>
@@ -111,7 +112,9 @@ export function Footer() {
           {/* Brand column */}
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: ".75rem", marginBottom: "1rem" }}>
-              <div style={{ width: 40, height: 40, borderRadius: "50%", background: T.gold, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.1rem" }}>👁️</div>
+              <div style={{ width: 44, height: 44, borderRadius: "50%", background: T.gold, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
+                <img src={labLogo} alt="CV & AI Lab Logo" style={{ width: 43, height: 43, objectFit: "cover" }} />
+              </div>
               <div>
                 <div style={{ color: T.gold, fontFamily: "'Noto Serif',serif", fontWeight: 700, fontSize: ".94rem" }}>CV & AI Laboratory</div>
                 <div style={{ color: "#8faac0", fontSize: ".67rem" }}>University of Peradeniya</div>

@@ -1,5 +1,6 @@
 import { T } from "../styles/theme";
 import { PORTAL_MENUS } from "../data/labData";
+import labLogo from "../assets/lab-logo.png";
 
 const ROLE_LABEL = { student: "Student Portal", staff: "Staff Portal", admin: "Admin Portal" };
 const ROLE_COLOR = { student: "#3b82f6", staff: T.green, admin: T.gold };
@@ -14,7 +15,9 @@ export function PortalSidebar({ role, active, setActive, onLogout }) {
       {/* Sidebar header */}
       <div style={{ background: T.navy, padding: "1rem 1.2rem", borderBottom: `2px solid ${T.gold}` }}>
         <div style={{ display: "flex", alignItems: "center", gap: ".6rem", marginBottom: ".4rem" }}>
-          <div style={{ width: 32, height: 32, borderRadius: "50%", background: T.gold, display: "flex", alignItems: "center", justifyContent: "center", fontSize: ".85rem" }}>👁️</div>
+          <div style={{ width: 36, height: 36, borderRadius: "50%", background: T.gold, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
+              <img src={labLogo} alt="CV & AI Lab Logo" style={{ width: 35, height: 35, objectFit: "cover" }} />
+            </div>
           <div>
             <div style={{ color: T.gold, fontSize: ".64rem", fontWeight: 700, letterSpacing: ".08em", textTransform: "uppercase" }}>CV & AI Lab</div>
             <div style={{ color: T.white, fontSize: ".81rem", fontWeight: 700 }}>{ROLE_LABEL[role]}</div>
