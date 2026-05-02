@@ -47,8 +47,28 @@ const deleteItem=async(req,res)=>{
     }
 }
 
+// Update an item
+const updateItem = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { name, category, description, status } = req.body;
+        const result = await pool.query(
+            "UPDATE inventory SET name = $1, category = $2, description = $3, status = $4 WHERE id = $5 RETURNING *",
+            [name, category, description, status, id]
+        );
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: "Item not found" });
+        }
+        res.status(200).json(result.rows[0]);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Error updating item" });
+    }
+};
+
 module.exports = {
     getAllItems,
     createItem,
-    deleteItem
+    deleteItem,
+    updateItem
 };

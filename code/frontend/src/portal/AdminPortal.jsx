@@ -98,6 +98,11 @@ function EquipmentManagement() {
     }
   };
 
+  // Handle editing an item (placeholder for now)
+  const handleEditItem = (itemId) => {
+    alert(`Editing item with ID: ${itemId}`);
+  };
+
   useEffect(() => {
     fetchInventory();
   }, []);
@@ -137,14 +142,18 @@ function EquipmentManagement() {
       </div>
       
       <PTable
-        cols={["Equipment Name", "Category", "Description", "Status"]}
+        cols={["Equipment Name", "Category", "Description", "Status", "Actions"]}
         rows={inventory.map(item => [
           <strong key={`name-${item.id}`}>{item.name}</strong>, 
           item.category, 
           item.description,
-          <span key={`status-${item.id}`} style={{ padding:"2px 7px", background: `${T.green}15`, color: T.green, border:`1px solid ${T.green}35`, fontSize:".68rem", fontWeight:700, borderRadius:2 }}>
-            Available
-          </span>
+          <span key={`status-${item.id}`} style={{ padding:"2px 7px", background: item.status === "available" ? `${T.green}15` : `${T.amber}15`, color: item.status === "available" ? T.green : T.amber, border:`1px solid ${T.green}35`, fontSize:".68rem", fontWeight:700, borderRadius:2 }}>
+            {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
+          </span>,
+          <div key={`action-${item.id}`} style={{ display: "flex", gap: "0.5rem" }}>
+            <button onClick={() => handleEditItem(item.id)} style={{ padding: "4px 8px", background: T.blue, color: "white", border: "none", borderRadius: "3px", fontSize: "0.75rem", cursor: "pointer", fontWeight: "bold" }}>Edit</button>
+            {/* Add delete button here if needed */}
+          </div>
         ])}
         onManage={() => {}}
       />
