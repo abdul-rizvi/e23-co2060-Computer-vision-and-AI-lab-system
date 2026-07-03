@@ -9,7 +9,7 @@ const {
 } = require("../controllers/usersController");
 const { verifyToken, requireRole } = require("../middleware/authMiddleware");
 
-router.use(verifyToken, requireRole("officer", "admin"));
+router.use(verifyToken, requireRole("admin"));
 
 router.get("/", getAllUsers);
 router.post("/", createUser);

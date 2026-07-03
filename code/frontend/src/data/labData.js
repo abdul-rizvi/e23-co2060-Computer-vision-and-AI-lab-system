@@ -28,6 +28,7 @@ import {
   LuBadgeInfo,
   LuCalendarDays,
   LuBookMarked,
+  LuBarChart3,
 } from "react-icons/lu";
 
 export const ICONS = {
@@ -45,12 +46,14 @@ export const ICONS = {
   staffPortal: LuUsers,
   adminPortal: LuShieldCheck,
   overview: LuLayoutDashboard,
+  analytics: LuBarChart3,
   reservations: LuCalendarClock,
   equipment: LuWrench,
   usersMgmt: LuUsers,
   peopleMgmt: LuUsers,
   newsMgmt: LuFileText,
   booking: LuCalendarClock,
+  "booking-requests": LuCalendarClock,
   research: LuFlaskConical,
   achievement: LuAward,
   location: LuMapPin,
@@ -156,6 +159,10 @@ export const PORTAL_MENUS = {
   student: [
     { id: "history", iconKey: "bookings", label: "My Bookings" },
     { id: "booking", iconKey: "booking", label: "Book Resource" },
+  ],
+  officer: [
+    { id: "booking-requests", iconKey: "booking-requests", label: "Booking Requests" },
+    { id: "equipment", iconKey: "equipment", label: "Equipment" },
   ],
   staff: [
     { id: "dashboard", iconKey: "about", label: "Dashboard" },

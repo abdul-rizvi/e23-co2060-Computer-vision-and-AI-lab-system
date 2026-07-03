@@ -24,6 +24,7 @@ import { ContactPage }     from "./pages/ContactPage";
 // Portal
 import { PortalSidebar, PortalHeader } from "./portal/PortalLayout";
 import { StudentPortal } from "./portal/StudentPortal";
+import { OfficerPortal } from "./portal/OfficerPortal";
 import { StaffPortal }   from "./portal/StaffPortal";
 import { AdminPortal }   from "./portal/AdminPortal";
 
@@ -32,11 +33,13 @@ function restoreSession() {
     const storedUser = localStorage.getItem("user");
     if (!storedUser) return { role: null, tab: "overview" };
     const parsedUser = JSON.parse(storedUser);
-    const role = parsedUser.role === "officer" ? "admin" : parsedUser.role;
-    return {
-      role,
-      tab: role === "student" ? "history" : role === "admin" ? "overview" : "dashboard",
-    };
+    const role = parsedUser.role;
+    let tab;
+    if (role === "student") tab = "history";
+    else if (role === "admin") tab = "overview";
+    else if (role === "officer") tab = "booking-requests";
+    else tab = "dashboard";
+    return { role, tab };
   } catch (error) {
     console.error("Failed to restore session", error);
     return { role: null, tab: "dashboard" };
@@ -66,6 +69,7 @@ function PublicPage({ section, setSection, setShowBooking, setShowLogin }) {
 
 function PortalContent({ role, active, setShowBooking }) {
   if (role === "student") return <StudentPortal active={active} setShowBooking={setShowBooking} />;
+  if (role === "officer") return <OfficerPortal active={active} />;
   if (role === "staff")   return <StaffPortal   active={active} />;
   if (role === "admin")   return <AdminPortal   active={active} />;
   return null;
@@ -84,6 +88,7 @@ export default function App() {
     setUserRole(role);
     if (role === "student") setPortalTab("history");
     else if (role === "admin") setPortalTab("overview");
+    else if (role === "officer") setPortalTab("booking-requests");
     else setPortalTab("dashboard");
     setShowLogin(false);
   }, []);

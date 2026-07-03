@@ -22,6 +22,7 @@ const bookingRoutes = require("./routes/bookingRoutes");
 const usersRoutes = require("./routes/usersRoutes");
 const peopleRoutes = require("./routes/peopleRoutes");
 const newsRoutes = require("./routes/newsRoutes");
+const analyticsRoutes = require("./routes/analyticsRoutes");
 
 // Use routes
 app.use("/api/items", inventoryRoutes);
@@ -30,6 +31,7 @@ app.use("/api/bookings", bookingRoutes);
 app.use("/api/users", usersRoutes);
 app.use("/api/people", peopleRoutes);
 app.use("/api/news", newsRoutes);
+app.use("/api/analytics", analyticsRoutes);
 
 // Test database connection before starting
 const startServer = async () => {

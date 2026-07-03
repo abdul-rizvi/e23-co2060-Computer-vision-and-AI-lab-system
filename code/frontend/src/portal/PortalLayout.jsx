@@ -5,8 +5,8 @@ import labLogo from "../assets/lab-logo.png";
 import { Button } from "../components/UI";
 import { renderIcon } from "../components/iconUtils";
 
-const ROLE_LABEL = { student: "Student portal", staff: "Staff portal", admin: "Admin portal" };
-const ROLE_COLOR = { student: T.info, staff: T.success, admin: T.gold };
+const ROLE_LABEL = { student: "Student portal", officer: "Officer portal", staff: "Staff portal", admin: "Admin portal" };
+const ROLE_COLOR = { student: T.info, officer: T.warning, staff: T.success, admin: T.gold };
 
 function getInitials(name) {
   if (!name) return "??";
