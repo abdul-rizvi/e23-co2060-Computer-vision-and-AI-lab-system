@@ -154,7 +154,7 @@ export default function App() {
       <MainNav
         section={section}
         setSection={setSection}
-        onBook={() => setShowBooking(true)}
+        onBook={() => setShowLogin(true)}
       />
       <Breadcrumb section={section} />
 

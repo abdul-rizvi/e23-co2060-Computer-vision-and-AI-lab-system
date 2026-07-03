@@ -23,7 +23,7 @@ function normalizeNews(rows) {
   }));
 }
 
-function HeroSlider({ setSection, setShowBooking }) {
+function HeroSlider({ setSection, setShowLogin }) {
   const [slide, setSlide] = useState(0);
 
   useEffect(() => {
@@ -41,7 +41,7 @@ function HeroSlider({ setSection, setShowBooking }) {
           <p style={{ margin: "1rem 0 0", color: "rgba(255,255,255,.76)", fontSize: "1rem", lineHeight: 1.7, maxWidth: 620 }}>{current.sub}</p>
           <div style={{ display: "flex", gap: ".8rem", flexWrap: "wrap", marginTop: "1.5rem" }}>
             <Button variant="gold" icon={LuArrowRight} onClick={() => setSection("research")}>Explore research</Button>
-            <Button variant="outline" icon={LuCalendarClock} onClick={() => setShowBooking(true)} style={{ color: T.white, borderColor: "rgba(255,255,255,.22)" }}>Book equipment</Button>
+            <Button variant="outline" icon={LuCalendarClock} onClick={() => setShowLogin(true)} style={{ color: T.white, borderColor: "rgba(255,255,255,.22)" }}>Sign in to book</Button>
           </div>
         </div>
 
@@ -84,7 +84,7 @@ function QuickLinks({ setShowBooking, setShowLogin }) {
     { title: "Student portal", desc: "Bookings, history, and QR passes.", action: () => setShowLogin(true), icon: ICONS.studentPortal },
     { title: "Staff portal", desc: "Consultations, projects, and approvals.", action: () => setShowLogin(true), icon: ICONS.staffPortal },
     { title: "Admin portal", desc: "Reservations, people, news, and equipment.", action: () => setShowLogin(true), icon: ICONS.adminPortal },
-    { title: "Book equipment", desc: "Reserve GPU, drones, cameras, and more.", action: () => setShowBooking(true), icon: ICONS.booking },
+    { title: "Book equipment", desc: "Reserve GPU, drones, cameras, and more.", action: () => setShowLogin(true), icon: ICONS.booking },
   ];
 
   return (
@@ -335,7 +335,7 @@ export function HomePage({ setSection, setShowBooking, setShowLogin }) {
     <>
       <div className="section-padding">
         <div className="page-shell">
-          <HeroSlider setSection={setSection} setShowBooking={setShowBooking} />
+          <HeroSlider setSection={setSection} setShowLogin={setShowLogin} />
         </div>
       </div>
       <QuickLinks setShowBooking={setShowBooking} setShowLogin={setShowLogin} />

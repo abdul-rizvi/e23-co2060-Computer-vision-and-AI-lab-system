@@ -74,7 +74,7 @@ export function MainNav({ section, setSection, onBook }) {
           </button>
         ))}
         <div style={{ flex: 1 }} />
-        <Button variant="gold" size="sm" icon={LuArrowRight} onClick={onBook}>Book equipment</Button>
+        <Button variant="gold" size="sm" icon={LuArrowRight} onClick={onBook}>Sign in to book</Button>
       </div>
     </div>
   );
