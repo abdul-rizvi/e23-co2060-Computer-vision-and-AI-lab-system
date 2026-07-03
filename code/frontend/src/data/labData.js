@@ -28,7 +28,6 @@ import {
   LuBadgeInfo,
   LuCalendarDays,
   LuBookMarked,
-  LuBarChart3,
 } from "react-icons/lu";
 
 export const ICONS = {
@@ -46,7 +45,7 @@ export const ICONS = {
   staffPortal: LuUsers,
   adminPortal: LuShieldCheck,
   overview: LuLayoutDashboard,
-  analytics: LuBarChart3,
+  analytics: LuLayoutDashboard,
   reservations: LuCalendarClock,
   equipment: LuWrench,
   usersMgmt: LuUsers,
