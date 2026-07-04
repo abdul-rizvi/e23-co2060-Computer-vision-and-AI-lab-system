@@ -2,6 +2,7 @@ const pool = require("../config/db");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { sendRegistrationEmail, sendOtpEmail } = require("../services/emailService");
+const { OAuth2Client } = require("google-auth-library");
 
 // INITIATE REGISTRATION (Step 1) — generates and sends OTP
 const initiateRegistration = async (req, res) => {
@@ -152,4 +153,67 @@ const login = async (req, res) => {
     }
 };
 
-module.exports = { initiateRegistration, verifyRegistration, login };
+// GOOGLE LOGIN / REGISTER
+const googleLogin = async (req, res) => {
+    try {
+        const { credential } = req.body;
+        if (!credential) return res.status(400).json({ message: "No credential provided" });
+
+        const client = new OAuth2Client(process.env.Client_ID);
+        const ticket = await client.verifyIdToken({
+            idToken: credential,
+            audience: process.env.Client_ID,
+        });
+        const payload = ticket.getPayload();
+        const { email, name } = payload;
+
+        // Ensure domain restriction
+        if (!email.toLowerCase().endsWith("@eng.pdn.ac.lk")) {
+            return res.status(403).json({
+                message: "Google login is only available for University of Peradeniya students (@eng.pdn.ac.lk). Please use an allowed account."
+            });
+        }
+
+        // Check if user exists
+        let userResult = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
+        let user;
+
+        if (userResult.rows.length === 0) {
+            // Register new user instantly
+            const assignedRole = "student";
+            const randomPassword = await bcrypt.hash(Math.random().toString(36).slice(-8), 10);
+            
+            const insertResult = await pool.query(
+                "INSERT INTO users (name, email, password, role) VALUES ($1, $2, $3, $4) RETURNING id, name, email, role",
+                [name, email, randomPassword, assignedRole]
+            );
+            user = insertResult.rows[0];
+
+            // Send welcome email (non-blocking)
+            sendRegistrationEmail(email, name, assignedRole).catch(err =>
+                console.error("Welcome email sending failed (non-critical):", err.message)
+            );
+        } else {
+            user = userResult.rows[0];
+        }
+
+        // Generate JWT token
+        const token = jwt.sign(
+            { id: user.id, email: user.email, role: user.role },
+            process.env.JWT_SECRET,
+            { expiresIn: "1d" }
+        );
+
+        res.json({
+            message: "Login successful",
+            token,
+            user: { id: user.id, name: user.name, email: user.email, role: user.role }
+        });
+
+    } catch (error) {
+        console.error("Google Login Error:", error);
+        res.status(500).json({ message: "Google Login failed" });
+    }
+};
+
+module.exports = { initiateRegistration, verifyRegistration, login, googleLogin };

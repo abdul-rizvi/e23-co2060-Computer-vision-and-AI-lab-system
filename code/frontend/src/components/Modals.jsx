@@ -3,7 +3,8 @@ import { LuArrowRight, LuCalendarClock, LuCircleCheckBig, LuCircleAlert, LuLockK
 import { T } from "../styles/theme";
 import { Button, Field, Modal } from "./UI";
 import { EQUIPMENT } from "../data/labData";
-import { loginUser, initiateRegistration, verifyRegistration, createBooking } from "../services/api";
+import { loginUser, initiateRegistration, verifyRegistration, createBooking, googleLoginUser } from "../services/api";
+import { GoogleLogin } from '@react-oauth/google';
 
 export function BookingModal({ onClose }) {
   const [step, setStep] = useState(1);
@@ -139,6 +140,23 @@ export function LoginModal({ onLogin, onClose, onSwitchToRegister }) {
     if (e.key === "Enter") handleSignIn();
   };
 
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      setIsLoading(true);
+      setError("");
+      const response = await googleLoginUser({ credential: credentialResponse.credential });
+      localStorage.setItem("token", response.data.token);
+      localStorage.setItem("user", JSON.stringify(response.data.user));
+      const backendRole = response.data.user.role;
+      onLogin(backendRole);
+    } catch (err) {
+      console.error("Google Login failed:", err);
+      setError(err.response?.data?.message || "Google authentication failed.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <Modal title="Internal portal access" subtitle="Sign in to manage bookings, people, news, and equipment." onClose={onClose} maxWidth={460}>
       <div style={{ display: "grid", gap: "1rem" }}>
@@ -154,6 +172,24 @@ export function LoginModal({ onLogin, onClose, onSwitchToRegister }) {
         <Field label="University email" type="email" placeholder="id@pdn.ac.lk" value={email} onChange={(e) => setEmail(e.target.value)} onKeyDown={handleKeyDown} icon={LuLockKeyhole} />
         <Field label="Password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} onKeyDown={handleKeyDown} icon={LuLockKeyhole} />
         <Button variant="primary" fullWidth onClick={handleSignIn} disabled={isLoading}>{isLoading ? "Verifying…" : "Sign in"}</Button>
+        
+        <div style={{ display: "flex", alignItems: "center", gap: "1rem", margin: ".5rem 0" }}>
+          <div style={{ flex: 1, height: 1, background: T.border }}></div>
+          <div style={{ color: T.textLight, fontSize: ".8rem" }}>OR</div>
+          <div style={{ flex: 1, height: 1, background: T.border }}></div>
+        </div>
+
+        <div style={{ display: "flex", justifyContent: "center" }}>
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={() => setError("Google Login was closed or failed.")}
+            useOneTap
+            shape="rectangular"
+            theme="filled_black"
+            text="signin_with"
+          />
+        </div>
+
         <Button variant="ghost" fullWidth onClick={onClose}>Cancel</Button>
         <div style={{ textAlign: "center", color: T.textLight, fontSize: ".82rem", paddingTop: ".2rem" }}>
           New to the portal? <button type="button" onClick={onSwitchToRegister} style={{ border: 0, background: "none", padding: 0, color: T.navy, fontWeight: 700, textDecoration: "underline" }}>Create an account</button>
@@ -182,6 +218,24 @@ export function RegisterModal({ onSuccess, onClose, onSwitchToLogin }) {
     if (e.key === "Enter") {
       if (step === 1) handleInitiate();
       else handleVerify();
+    }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      setIsLoading(true);
+      setError("");
+      const response = await googleLoginUser({ credential: credentialResponse.credential });
+      localStorage.setItem("token", response.data.token);
+      localStorage.setItem("user", JSON.stringify(response.data.user));
+      alert("Registration successful! You are now logged in.");
+      onSuccess();
+      onSwitchToLogin?.(); // Switch to login modal logic, or just close if it auto-logs in
+    } catch (err) {
+      console.error("Google Registration failed:", err);
+      setError(err.response?.data?.message || "Google authentication failed.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -273,6 +327,23 @@ export function RegisterModal({ onSuccess, onClose, onSwitchToLogin }) {
             <Button variant="primary" fullWidth onClick={handleInitiate} disabled={isLoading || isExternalEmail}>
               {isLoading ? "Sending Code…" : "Send Verification Code"}
             </Button>
+            
+            <div style={{ display: "flex", alignItems: "center", gap: "1rem", margin: ".2rem 0" }}>
+              <div style={{ flex: 1, height: 1, background: T.border }}></div>
+              <div style={{ color: T.textLight, fontSize: ".8rem" }}>OR</div>
+              <div style={{ flex: 1, height: 1, background: T.border }}></div>
+            </div>
+
+            <div style={{ display: "flex", justifyContent: "center" }}>
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={() => setError("Google Login was closed or failed.")}
+                shape="rectangular"
+                theme="filled_black"
+                text="signup_with"
+              />
+            </div>
+
             <Button variant="ghost" fullWidth onClick={onClose}>Cancel</Button>
             <div style={{ textAlign: "center", color: T.textLight, fontSize: ".82rem", paddingTop: ".2rem" }}>
               Already have an account? <button type="button" onClick={onSwitchToLogin} style={{ border: 0, background: "none", padding: 0, color: T.navy, fontWeight: 700, textDecoration: "underline" }}>Sign in here</button>
