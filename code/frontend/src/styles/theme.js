@@ -318,6 +318,9 @@ export const GLOBAL_CSS = `
   }
   .modal-shell {
     width: min(100%, 720px);
+    max-height: calc(100vh - 2rem);
+    display: flex;
+    flex-direction: column;
     background: var(--surface);
     border-radius: 24px;
     border: 1px solid rgba(255,255,255,.12);
@@ -355,7 +358,7 @@ export const GLOBAL_CSS = `
     justify-content: center;
     flex: 0 0 auto;
   }
-  .modal-body { padding: 1.25rem 1.35rem 1.4rem; }
+  .modal-body { padding: 1.25rem 1.35rem 1.4rem; overflow-y: auto; flex: 1; }
 
   .portal-sidebar {
     background: linear-gradient(180deg, var(--navy-dark), #14203a);

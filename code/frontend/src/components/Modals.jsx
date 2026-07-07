@@ -293,12 +293,12 @@ export function RegisterModal({ onSuccess, onClose, onSwitchToLogin }) {
 
   return (
     <Modal title="Create an account" subtitle="University of Peradeniya students can register instantly." onClose={onClose} maxWidth={500}>
-      <div style={{ display: "grid", gap: "1rem" }}>
+      <div style={{ display: "grid", gap: ".65rem" }}>
         
         {step === 1 ? (
           <>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 56, height: 56, borderRadius: 18, background: `${T.success}10`, color: T.success, margin: "0 auto" }}>
-              <LuUserPlus size={24} />
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 44, height: 44, borderRadius: 14, background: `${T.success}10`, color: T.success, margin: "0 auto" }}>
+              <LuUserPlus size={20} />
             </div>
 
             {/* External user info box */}
