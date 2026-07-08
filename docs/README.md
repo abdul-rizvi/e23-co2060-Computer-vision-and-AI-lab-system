@@ -42,6 +42,7 @@ Computer vision & AI lab system
 5. [Conclusion](#conclusion)
 6. [Links](#links)
 7. [Appendix A: Use Case Diagram](./appendix_a.md)
+8. [Appendix B: ER Diagram](./appendix_b.md)
 
 ## Introduction
 
@@ -75,6 +76,7 @@ What was achieved, future developments, commercialization plans
 ## Appendices
 
 - [Appendix A: Use Case Diagram](./appendix_a.md)
+- [Appendix B: ER Diagram](./appendix_b.md)
 
 [//]: # (Please refer this to learn more about Markdown syntax)
 [//]: # (https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet)
