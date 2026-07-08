@@ -41,6 +41,7 @@ Computer vision & AI lab system
 4. [Testing](#testing)
 5. [Conclusion](#conclusion)
 6. [Links](#links)
+7. [Appendix A: Use Case Diagram](./appendix_a.md)
 
 ## Introduction
 
@@ -70,6 +71,10 @@ What was achieved, future developments, commercialization plans
 - [Project Page]
 - [Department of Computer Engineering](http://www.ce.pdn.ac.lk/)
 - [University of Peradeniya](https://eng.pdn.ac.lk/)
+
+## Appendices
+
+- [Appendix A: Use Case Diagram](./appendix_a.md)
 
 [//]: # (Please refer this to learn more about Markdown syntax)
 [//]: # (https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet)
