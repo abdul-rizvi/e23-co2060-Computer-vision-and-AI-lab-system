@@ -12,6 +12,11 @@ This appendix provides the Use Case Diagram and detailed descriptions of the act
 
 The following diagram outlines the interactions between the system's actors and the key functional modules (Public Portal, Resource Booking Engine, GPU Scheduling, Inventory Management, and Academic Consultations).
 
+![Use Case Diagram](./images/use_case_diagram.png)
+
+<details>
+<summary><b>Click to expand Mermaid Source Code</b></summary>
+
 ```mermaid
 graph LR
     %% Actors
@@ -94,6 +99,7 @@ graph LR
     UC5 -.->|Sends Request Confirmation & Admin Alert| EmailSystem
     UC8 -.->|Sends Status Approval/Rejection Alert| EmailSystem
 ```
+</details>
 
 ---
 
