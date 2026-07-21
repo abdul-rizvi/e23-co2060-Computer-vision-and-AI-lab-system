@@ -68,7 +68,7 @@ export function PortalHeader() {
   const initials = getInitials(user?.name);
 
   return (
-    <div style={{ background: T.surface, borderBottom: `1px solid ${T.border}`, padding: ".85rem 1.35rem", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "1rem", flexShrink: 0 }}>
+    <div style={{ background: T.surface, borderBottom: `1px solid ${T.border}`, padding: ".85rem 1.35rem", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "1rem", flexShrink: 0, position: "sticky", top: 0, zIndex: 10 }}>
       <div style={{ color: T.textLight, fontSize: ".82rem" }}>
         <span style={{ color: T.navyDark, fontWeight: 700 }}>CV & AI Laboratory</span> · Internal management system
       </div>

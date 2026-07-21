@@ -129,7 +129,7 @@ export default function App() {
           onLogout={handleLogout}
         />
 
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: "100vh", overflow: "hidden" }}>
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: "100vh" }}>
           <PortalHeader role={userRole} />
           <main style={{ flex: 1, padding: "2rem", overflowY: "auto" }}>
             <PortalContent
