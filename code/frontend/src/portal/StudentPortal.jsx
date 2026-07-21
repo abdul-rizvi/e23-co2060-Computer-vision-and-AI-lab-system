@@ -38,6 +38,10 @@ function BookingForm() {
   const [options, setOptions] = useState(["Training Run (A100)", "Consultation - CV Methodology", "Lab Space Access"]);
   const [form, setForm] = useState({ resource: "", date: "", time: "", purpose: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [dateError, setDateError] = useState("");
+
+  // Today in YYYY-MM-DD format (local time) — used as the min date
+  const todayStr = new Date().toLocaleDateString("en-CA"); // e.g. "2025-07-21"
 
   useEffect(() => {
     const fetchResources = async () => {
@@ -54,9 +58,31 @@ function BookingForm() {
 
   const set = (key) => (e) => setForm((value) => ({ ...value, [key]: e.target.value }));
 
+  const handleDateChange = (e) => {
+    const val = e.target.value;
+    setForm((prev) => ({ ...prev, date: val }));
+
+    if (!val) { setDateError(""); return; }
+
+    // Parse date parts directly from the string to avoid timezone issues
+    const [year, month, day] = val.split("-").map(Number);
+    const picked = new Date(year, month - 1, day); // local date
+    const dayOfWeek = picked.getDay(); // 0 = Sunday, 6 = Saturday
+
+    if (dayOfWeek === 0 || dayOfWeek === 6) {
+      setDateError("Weekends (Saturday & Sunday) are not available for booking. Please choose a weekday.");
+    } else {
+      setDateError("");
+    }
+  };
+
   const handleSubmit = async () => {
     if (!form.resource || !form.date || !form.time) {
       alert("Please select a resource, date, and time slot.");
+      return;
+    }
+    if (dateError) {
+      alert("Please select a valid weekday date.");
       return;
     }
 
@@ -79,14 +105,24 @@ function BookingForm() {
       <p style={{ color: T.textLight, fontSize: ".9rem", marginBottom: "1.2rem" }}>Submit your request. All bookings are subject to staff or admin approval.</p>
       <Card style={{ padding: "1.25rem", maxWidth: 560 }}>
         <Field label="Resource / type" value={form.resource} onChange={set("resource")} options={options} icon={LuCamera} />
-        <Field label="Preferred date" type="date" value={form.date} onChange={set("date")} icon={LuClock3} />
+        <Field
+          label="Preferred date"
+          type="date"
+          value={form.date}
+          onChange={handleDateChange}
+          icon={LuClock3}
+          min={todayStr}
+          error={dateError}
+          helperText="Monday – Friday only. Weekends are unavailable."
+        />
         <Field label="Time slot" value={form.time} onChange={set("time")} options={["08:00–10:00", "10:00–12:00", "13:00–15:00", "15:00–17:00", "17:00–19:00"]} icon={LuClock3} />
         <Field label="Purpose / notes" rows={3} value={form.purpose} onChange={set("purpose")} placeholder="Describe your intended use..." />
-        <Button variant="primary" icon={LuUpload} fullWidth onClick={handleSubmit} disabled={isSubmitting}>{isSubmitting ? "Submitting…" : "Submit request"}</Button>
+        <Button variant="primary" icon={LuUpload} fullWidth onClick={handleSubmit} disabled={isSubmitting || !!dateError}>{isSubmitting ? "Submitting…" : "Submit request"}</Button>
       </Card>
     </div>
   );
 }
+
 
 function UsageHistory() {
   const [history, setHistory] = useState([]);
