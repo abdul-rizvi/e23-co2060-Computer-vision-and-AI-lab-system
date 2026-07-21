@@ -26,6 +26,9 @@ title: Computer Vision & AI Lab System
 4. [Testing](#testing)
 5. [Conclusion](#conclusion)
 6. [Links](#links)
+7. [Appendix A: Use Case Diagram](./appendix_a.md)
+8. [Appendix B: ER Diagram](./appendix_b.md)
+9. [Appendix C: Project Timeline / Gantt Chart](./appendix_c.md)
 
 ---
 
@@ -253,6 +256,12 @@ The platform's architecture is generic enough to be adapted for any university l
 - [Project Page](https://cepdnaclk.github.io/e23-co2060-Computer-vision-and-AI-lab-system/)
 - [Department of Computer Engineering](http://www.ce.pdn.ac.lk/)
 - [University of Peradeniya](https://eng.pdn.ac.lk/)
+
+## Appendices
+
+- [Appendix A: Use Case Diagram](./appendix_a.md)
+- [Appendix B: ER Diagram](./appendix_b.md)
+- [Appendix C: Project Timeline / Gantt Chart](./appendix_c.md)
 
 [//]: # (Please refer this to learn more about Markdown syntax)
 [//]: # (https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet)

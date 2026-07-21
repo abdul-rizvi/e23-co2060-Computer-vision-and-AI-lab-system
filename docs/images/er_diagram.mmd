@@ -1,0 +1,33 @@
+erDiagram
+    users {
+        int id PK "Serial Primary Key"
+        varchar name "Name of the user"
+        varchar email UK "Unique login email"
+        text password "Bcrypt hashed password"
+        varchar role "student, professor, officer, admin, staff"
+    }
+
+    inventory {
+        int id PK "Serial Primary Key"
+        varchar name "Name of the equipment"
+        varchar category "Drone, Camera, Sensor, etc."
+        text description "Detailed hardware specs"
+        varchar status "Default: available"
+    }
+
+    reservations {
+        int id PK "Serial Primary Key"
+        int user_id FK "References users.id"
+        varchar request_type "General Booking, GPU Scheduling, etc."
+        varchar resource "Resource name or category description"
+        date booking_date "Date requested"
+        varchar time_slot "e.g., 08:00–10:00"
+        text purpose "Use case description"
+        varchar status "Pending, Approved, Rejected"
+        varchar fee "Default: TBD or calculated rate"
+        timestamp created_at "Created timestamp"
+    }
+
+    %% Relationships
+    users ||--o{ reservations : "places"
+    inventory ||--o{ reservations : "references (Logical)"

@@ -1,0 +1,80 @@
+graph LR
+    %% Actors
+    subgraph Actors ["Actors"]
+        Visitor["👤 Public Visitor"]
+        Student["🎓 Student"]
+        Staff["🔬 Staff / Professor"]
+        Officer["🛠️ Lab Officer / Admin"]
+    end
+
+    %% System Boundary
+    subgraph Lab_System ["Computer Vision & AI Lab Management System"]
+        %% Public Portal Module
+        subgraph Public_Portal ["Public Portal (External)"]
+            UC1(["View Research & Publications"])
+            UC2(["View Facilities & Services"])
+            UC3(["Register Account"])
+            UC4(["Login to Portal"])
+        end
+
+        %% Resource Booking Engine
+        subgraph Booking_Engine ["Resource Booking Engine"]
+            UC5(["Book Lab Resource"])
+            UC6(["View Personal Booking History"])
+            UC7(["Generate/View Lab Access Pass (QR)"])
+            UC8(["Approve/Reject Booking Request"])
+            UC9(["View All Reservations"])
+        end
+
+        %% Inventory Management Module
+        subgraph Inventory_Mgmt ["Inventory Management"]
+            UC10(["View Live Equipment Status"])
+            UC11(["Manage Lab Inventory (Add/Delete)"])
+        end
+
+        %% Academic Consultations Module
+        subgraph Consultations_Mgmt ["Consultation Scheduling"]
+            UC12(["Request Supervisor Consultation"])
+            UC13(["Approve/Decline Consultation Request"])
+        end
+
+        %% GPU Scheduling Module
+        subgraph GPU_Mgmt ["GPU Scheduling & Monitoring"]
+            UC14(["Monitor GPU Queue & Compute Node Status"])
+        end
+    end
+
+    %% External Systems / Secondary Actors
+    EmailSystem["✉️ Email Notification System"]
+
+    %% Visitor Interactions
+    Visitor --> UC1
+    Visitor --> UC2
+    Visitor --> UC3
+    Visitor --> UC4
+
+    %% Student Interactions
+    Student --> UC4
+    Student --> UC10
+    Student --> UC5
+    Student --> UC6
+    Student --> UC7
+    Student --> UC12
+
+    %% Staff Interactions
+    Staff --> UC4
+    Staff --> UC9
+    Staff --> UC13
+    Staff --> UC14
+
+    %% Officer / Admin Interactions
+    Officer --> UC4
+    Officer --> UC10
+    Officer --> UC11
+    Officer --> UC8
+    Officer --> UC9
+
+    %% System Boundary to External Systems
+    UC3 -.->|Sends Registration Confirmation| EmailSystem
+    UC5 -.->|Sends Request Confirmation & Admin Alert| EmailSystem
+    UC8 -.->|Sends Status Approval/Rejection Alert| EmailSystem
