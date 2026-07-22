@@ -1,10 +1,9 @@
 import { T } from "../styles/theme";
-import { Button, Card, Divider, SectionLabel, SectionTitle } from "../components/UI";
+import { Card, Divider, SectionLabel, SectionTitle } from "../components/UI";
 import { renderIcon } from "../components/iconUtils";
 import { EQUIPMENT, ICONS } from "../data/labData";
-import { LuArrowRight } from "react-icons/lu";
 
-export function FacilitiesPage({ setShowBooking }) {
+export function FacilitiesPage() {
   return (
     <div className="page-shell section-padding">
       <SectionLabel text="Facilities" />
@@ -25,9 +24,7 @@ export function FacilitiesPage({ setShowBooking }) {
               <div style={{ fontWeight: 700, color: T.navyDark, fontSize: ".98rem" }}>{equipment.name}</div>
               <div style={{ color: T.textMid, fontSize: ".86rem", marginTop: ".35rem" }}>{equipment.spec}</div>
               <div style={{ color: T.textLight, fontSize: ".79rem", marginTop: ".35rem" }}>Category: {equipment.cat} · Fee: {equipment.fee}</div>
-              <div style={{ marginTop: "1rem" }}>
-                <Button variant="outline" icon={LuArrowRight} fullWidth onClick={() => setShowBooking(true)}>{equipment.avail ? "Book now" : "Join waitlist"}</Button>
-              </div>
+
             </Card>
           );
         })}
