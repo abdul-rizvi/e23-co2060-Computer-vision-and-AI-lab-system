@@ -3,7 +3,7 @@ import { LuArrowRight, LuCalendarClock, LuCircleCheckBig, LuCircleAlert, LuLockK
 import { T } from "../styles/theme";
 import { Button, Field, Modal } from "./UI";
 import { EQUIPMENT } from "../data/labData";
-import { loginUser, initiateRegistration, verifyRegistration, createBooking, googleLoginUser } from "../services/api";
+import { loginUser, initiateRegistration, verifyRegistration, createBooking, googleLoginUser, forgotPasswordInitiate, resetPassword } from "../services/api";
 import { GoogleLogin } from '@react-oauth/google';
 
 export function BookingModal({ onClose }) {
@@ -108,7 +108,7 @@ export function BookingModal({ onClose }) {
   );
 }
 
-export function LoginModal({ onLogin, onClose, onSwitchToRegister }) {
+export function LoginModal({ onLogin, onClose, onSwitchToRegister, onSwitchToForgotPassword }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -171,6 +171,9 @@ export function LoginModal({ onLogin, onClose, onSwitchToRegister }) {
         )}
         <Field label="University email" type="email" placeholder="id@pdn.ac.lk" value={email} onChange={(e) => setEmail(e.target.value)} onKeyDown={handleKeyDown} icon={LuLockKeyhole} />
         <Field label="Password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} onKeyDown={handleKeyDown} icon={LuLockKeyhole} />
+        <div style={{ textAlign: "right", marginTop: "-.5rem" }}>
+          <button type="button" onClick={onSwitchToForgotPassword} style={{ border: 0, background: "none", padding: 0, color: T.textLight, fontSize: ".8rem", fontWeight: 600, textDecoration: "underline", cursor: "pointer" }}>Forgot password?</button>
+        </div>
         <Button variant="primary" fullWidth onClick={handleSignIn} disabled={isLoading}>{isLoading ? "Verifying…" : "Sign in"}</Button>
         
         <div style={{ display: "flex", alignItems: "center", gap: "1rem", margin: ".5rem 0" }}>
@@ -384,6 +387,139 @@ export function RegisterModal({ onSuccess, onClose, onSwitchToLogin }) {
           </>
         )}
 
+      </div>
+    </Modal>
+  );
+}
+
+export function ForgotPasswordModal({ onClose, onSwitchToLogin }) {
+  const [step, setStep] = useState(1); // 1: email, 2: otp, 3: new password
+  const [email, setEmail] = useState("");
+  const [otp, setOtp] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleKeyDown = (e) => {
+    if (e.key !== "Enter") return;
+    if (step === 1) handleSendCode();
+    else if (step === 2) handleContinueToReset();
+    else handleResetPassword();
+  };
+
+  const handleSendCode = async () => {
+    if (!email) {
+      setError("Please enter your email address.");
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      setError("");
+      await forgotPasswordInitiate({ email });
+      setStep(2);
+    } catch (err) {
+      console.error("Forgot password initiate failed:", err);
+      setError(err.response?.data?.message || "Failed to send verification code. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleContinueToReset = () => {
+    if (!otp || otp.length !== 6) {
+      setError("Please enter the 6-digit code.");
+      return;
+    }
+    setError("");
+    setStep(3);
+  };
+
+  const handleResetPassword = async () => {
+    if (!newPassword || !confirmPassword) {
+      setError("Please fill in both password fields.");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+    if (newPassword.length < 6) {
+      setError("Password must be at least 6 characters long.");
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      setError("");
+      await resetPassword({ email, otp, newPassword });
+      alert("Your password has been reset successfully. You can now sign in with your new password.");
+      onSwitchToLogin?.();
+    } catch (err) {
+      console.error("Reset password failed:", err);
+      setError(err.response?.data?.message || "Failed to reset password. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <Modal
+      title="Reset your password"
+      subtitle={
+        step === 1
+          ? "Enter your university email and we'll send you a verification code."
+          : step === 2
+            ? "Enter the 6-digit code we sent to your email."
+            : "Create a new password for your account."
+      }
+      onClose={onClose}
+      maxWidth={460}
+    >
+      <div style={{ display: "grid", gap: "1rem" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 56, height: 56, borderRadius: 18, background: `${T.gold}18`, color: T.gold, margin: "0 auto" }}>
+          <LuLockKeyhole size={24} />
+        </div>
+
+        {error && (
+          <div style={{ display: "flex", gap: ".55rem", alignItems: "flex-start", padding: ".85rem .95rem", borderRadius: 14, background: `${T.danger}10`, color: T.danger, border: `1px solid ${T.danger}26`, fontSize: ".84rem" }}>
+            <LuCircleAlert size={15} style={{ marginTop: 2, flexShrink: 0 }} />
+            <span>{error}</span>
+          </div>
+        )}
+
+        {step === 1 && (
+          <>
+            <Field label="University email" type="email" placeholder="id@pdn.ac.lk" value={email} onChange={(e) => setEmail(e.target.value)} onKeyDown={handleKeyDown} icon={LuLockKeyhole} />
+            <Button variant="primary" fullWidth onClick={handleSendCode} disabled={isLoading}>{isLoading ? "Sending Code…" : "Send Verification Code"}</Button>
+          </>
+        )}
+
+        {step === 2 && (
+          <>
+            <div style={{ textAlign: "center", color: T.textLight, fontSize: ".9rem", marginBottom: "-.3rem" }}>
+              We've sent a 6-digit code to <strong>{email}</strong>.
+            </div>
+            <Field label="Verification code" type="text" placeholder="123456" value={otp} onChange={(e) => setOtp(e.target.value)} onKeyDown={handleKeyDown} icon={LuLockKeyhole} maxLength={6} />
+            <Button variant="primary" fullWidth onClick={handleContinueToReset} disabled={isLoading || otp.length !== 6}>Continue</Button>
+            <Button variant="ghost" fullWidth onClick={() => setStep(1)} disabled={isLoading}>Back</Button>
+          </>
+        )}
+
+        {step === 3 && (
+          <>
+            <Field label="New password" type="password" placeholder="••••••••" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} onKeyDown={handleKeyDown} icon={LuLockKeyhole} />
+            <Field label="Confirm new password" type="password" placeholder="••••••••" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} onKeyDown={handleKeyDown} icon={LuLockKeyhole} />
+            <Button variant="primary" fullWidth onClick={handleResetPassword} disabled={isLoading}>{isLoading ? "Resetting…" : "Reset Password"}</Button>
+            <Button variant="ghost" fullWidth onClick={() => setStep(2)} disabled={isLoading}>Back</Button>
+          </>
+        )}
+
+        <div style={{ textAlign: "center", color: T.textLight, fontSize: ".82rem", paddingTop: ".2rem" }}>
+          Remembered your password? <button type="button" onClick={onSwitchToLogin} style={{ border: 0, background: "none", padding: 0, color: T.navy, fontWeight: 700, textDecoration: "underline" }}>Sign in here</button>
+        </div>
       </div>
     </Modal>
   );
