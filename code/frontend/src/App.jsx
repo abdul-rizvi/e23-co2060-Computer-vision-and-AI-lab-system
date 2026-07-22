@@ -7,7 +7,7 @@ import { GLOBAL_CSS } from "./styles/theme";
 import { TopBar, LogoBar, MainNav, Breadcrumb, Footer } from "./components/Layout";
 
 // Modals
-import { BookingModal, LoginModal, RegisterModal } from "./components/Modals";
+import { BookingModal, LoginModal, RegisterModal, ForgotPasswordModal } from "./components/Modals";
 
 // Public pages
 import { HomePage }        from "./pages/HomePage";
@@ -76,9 +76,9 @@ function PublicPage({ section, setSection, setShowBooking, setShowLogin }) {
     case "projects":     return <ProjectsPage />;
     case "publications": return <PublicationsPage />;
     case "people":       return <PeoplePage />;
-    case "facilities":   return <FacilitiesPage />;
+    case "facilities":   return <FacilitiesPage  setShowBooking={setShowBooking} />;
     case "news":         return <NewsPage />;
-    case "services":     return <ServicesPage />;
+    case "services":     return <ServicesPage    setShowBooking={setShowBooking} />;
     case "contact":      return <ContactPage />;
     default:             return <HomePage {...shared} />;
   }
@@ -98,6 +98,7 @@ export default function App() {
   const [showBooking, setShowBooking] = useState(false);
   const [showLogin,   setShowLogin]   = useState(false);
   const [showRegister, setShowRegister] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [userRole,    setUserRole]    = useState(initialSession.role);
   const [portalTab,   setPortalTab]   = useState(initialSession.tab);
 
@@ -175,6 +176,7 @@ export default function App() {
           onLogin={handleLogin}
           onClose={() => setShowLogin(false)}
           onSwitchToRegister={() => { setShowLogin(false); setShowRegister(true); }}
+          onSwitchToForgotPassword={() => { setShowLogin(false); setShowForgotPassword(true); }}
         />
       )}
       {showRegister && (
@@ -182,6 +184,12 @@ export default function App() {
           onSuccess={() => setShowRegister(false)}
           onClose={() => setShowRegister(false)}
           onSwitchToLogin={() => { setShowRegister(false); setShowLogin(true); }}
+        />
+      )}
+      {showForgotPassword && (
+        <ForgotPasswordModal
+          onClose={() => setShowForgotPassword(false)}
+          onSwitchToLogin={() => { setShowForgotPassword(false); setShowLogin(true); }}
         />
       )}
     </div>

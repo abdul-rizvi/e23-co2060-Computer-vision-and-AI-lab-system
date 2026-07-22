@@ -14,6 +14,8 @@ export const initiateRegistration = (data) => API.post("/api/auth/register/initi
 export const verifyRegistration = (data) => API.post("/api/auth/register/verify", data);
 export const googleLoginUser = (data) => API.post("/api/auth/google", data);
 export const loginUser = (data) => API.post("/api/auth/login", data);
+export const forgotPasswordInitiate = (data) => API.post("/api/auth/forgot-password/initiate", data);
+export const resetPassword = (data) => API.post("/api/auth/forgot-password/reset", data);
 
 export const getItems = () => API.get("/api/items");
 export const createItem = (data) => API.post("/api/items", data);
