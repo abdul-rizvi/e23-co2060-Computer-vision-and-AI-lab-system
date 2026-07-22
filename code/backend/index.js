@@ -33,11 +33,33 @@ app.use("/api/people", peopleRoutes);
 app.use("/api/news", newsRoutes);
 app.use("/api/analytics", analyticsRoutes);
 
+// Ensure required tables exist on every server start
+const ensureTables = async () => {
+    await pool.query(`
+        CREATE TABLE IF NOT EXISTS otp_verifications (
+            email VARCHAR(200) PRIMARY KEY,
+            otp VARCHAR(6) NOT NULL,
+            user_data JSONB NOT NULL,
+            expires_at TIMESTAMP NOT NULL
+        );
+    `);
+    await pool.query(`
+        CREATE TABLE IF NOT EXISTS password_reset_otp (
+            email VARCHAR(200) PRIMARY KEY,
+            otp VARCHAR(6) NOT NULL,
+            expires_at TIMESTAMP NOT NULL
+        );
+    `);
+    console.log("Database tables verified.");
+};
+
 // Test database connection before starting
 const startServer = async () => {
     try {
         await pool.query("SELECT 1");
         console.log("Database connected successfully");
+
+        await ensureTables();
 
         const PORT = process.env.PORT || 5000;
         app.listen(PORT, () => {
