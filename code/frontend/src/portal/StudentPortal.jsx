@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { LuCamera, LuClock3, LuQrCode, LuUpload } from "react-icons/lu";
 import { T } from "../styles/theme";
 import { Badge, Button, Card, Field, PTable } from "../components/UI";
@@ -7,7 +8,7 @@ import { createBooking, getBookings, getItems } from "../services/api";
 
 function QRPassModal({ booking, onClose }) {
   if (!booking) return null;
-  return (
+  return createPortal(
     <div className="modal-bg" onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div className="modal-shell" style={{ width: "min(100%, 420px)" }}>
         <div className="modal-header">
@@ -30,9 +31,11 @@ function QRPassModal({ booking, onClose }) {
           <Button variant="primary" fullWidth onClick={onClose}>Close</Button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
+
 
 function BookingForm() {
   const [options, setOptions] = useState(["Training Run (A100)", "Consultation - CV Methodology", "Lab Space Access"]);

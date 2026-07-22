@@ -315,7 +315,6 @@ export const GLOBAL_CSS = `
     align-items: center;
     justify-content: center;
     padding: 1rem;
-    padding-top: 4rem;
   }
   .modal-shell {
     width: min(100%, 720px);
