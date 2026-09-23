@@ -14,13 +14,13 @@ const getAllNews = async (req, res) => {
 
 const createNews = async (req, res) => {
     try {
-        const { category, title, content, published_date } = req.body;
+        const { category, title, content, published_date, image_url, video_url } = req.body;
         if (!title) {
             return res.status(400).json({ message: "Title is required" });
         }
         const result = await pool.query(
-            "INSERT INTO news (category, title, content, published_date) VALUES ($1, $2, $3, $4) RETURNING *",
-            [category, title, content, published_date || null]
+            "INSERT INTO news (category, title, content, published_date, image_url, video_url) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
+            [category, title, content, published_date || null, image_url || null, video_url || null]
         );
         res.status(201).json(result.rows[0]);
     } catch (error) {
@@ -32,10 +32,10 @@ const createNews = async (req, res) => {
 const updateNews = async (req, res) => {
     try {
         const { id } = req.params;
-        const { category, title, content, published_date } = req.body;
+        const { category, title, content, published_date, image_url, video_url } = req.body;
         const result = await pool.query(
-            "UPDATE news SET category = $1, title = $2, content = $3, published_date = $4 WHERE id = $5 RETURNING *",
-            [category, title, content, published_date || null, id]
+            "UPDATE news SET category = $1, title = $2, content = $3, published_date = $4, image_url = $5, video_url = $6 WHERE id = $7 RETURNING *",
+            [category, title, content, published_date || null, image_url || null, video_url || null, id]
         );
 
         if (result.rows.length === 0) {

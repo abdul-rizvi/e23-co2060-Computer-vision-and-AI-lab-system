@@ -73,12 +73,25 @@ const getBookings = async (req, res) => {
 const updateBookingStatus = async (req, res) => {
     try {
         const { id } = req.params;
-        const { status } = req.body; // "Approved" or "Rejected"
+        const { status, booking_date, time_slot, admin_notes } = req.body; // "Approved", "Rejected", "Rescheduled"
 
-        const result = await pool.query(
-            "UPDATE reservations SET status = $1 WHERE id = $2 RETURNING *",
-            [status, id]
-        );
+        let query = "UPDATE reservations SET status = $1, admin_notes = $2";
+        const values = [status, admin_notes || null];
+        let paramIndex = 3;
+
+        if (booking_date) {
+            query += `, booking_date = $${paramIndex++}`;
+            values.push(booking_date);
+        }
+        if (time_slot) {
+            query += `, time_slot = $${paramIndex++}`;
+            values.push(time_slot);
+        }
+
+        query += ` WHERE id = $${paramIndex} RETURNING *`;
+        values.push(id);
+
+        const result = await pool.query(query, values);
 
         if (result.rows.length === 0) {
             return res.status(404).json({ message: "Booking not found" });

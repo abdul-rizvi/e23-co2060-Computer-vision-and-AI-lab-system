@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { LuCalendarClock, LuCheck, LuFileText, LuPencil, LuPlus, LuRefreshCcw, LuTrash2, LuUsers, LuWrench, LuX } from "react-icons/lu";
+import { LuCalendarClock, LuCheck, LuFileText, LuPencil, LuPlus, LuRefreshCcw, LuTrash2, LuUsers, LuWrench, LuX, LuLayers3, LuCalendarDays } from "react-icons/lu";
 import { T } from "../styles/theme";
 import { Badge, Button, Card, Field, Modal, PStat, PTable, Divider, SectionLabel, SectionTitle } from "../components/UI";
-import { createItem, createNews, createPerson, createUser, deleteItem, deleteNews, deletePerson, deleteUser, getBookings, getItems, getNews, getPeople, getUsers, updateBookingStatus, updateItem, updateNews, updatePerson, updateUser } from "../services/api";
+import { createItem, createNews, createPerson, createUser, deleteItem, deleteNews, deletePerson, deleteUser, getBookings, getItems, getNews, getPeople, getUsers, updateBookingStatus, updateItem, updateNews, updatePerson, updateUser, getProjects, createProject, updateProject, deleteProject } from "../services/api";
 
 function getStoredUser() {
   try {
@@ -197,11 +197,71 @@ function OverviewSection() {
   );
 }
 
+function RescheduleModal({ open, booking, onClose, onSaved }) {
+  const [form, setForm] = useState({ booking_date: "", time_slot: "", admin_notes: "" });
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (open && booking) {
+      setForm({
+        booking_date: booking.booking_date ? String(booking.booking_date).slice(0, 10) : "",
+        time_slot: booking.time_slot || "",
+        admin_notes: booking.admin_notes || ""
+      });
+      setSaving(false);
+      setError("");
+    }
+  }, [open, booking]);
+
+  if (!open || !booking) return null;
+
+  const set = (key) => (e) => setForm((prev) => ({ ...prev, [key]: e.target.value }));
+
+  const submit = async () => {
+    if (!form.booking_date || !form.time_slot) {
+      setError("Please provide a new date and time slot.");
+      return;
+    }
+    setSaving(true);
+    setError("");
+    try {
+      await updateBookingStatus(booking.id, {
+        status: "Rescheduled",
+        booking_date: form.booking_date,
+        time_slot: form.time_slot,
+        admin_notes: form.admin_notes
+      });
+      onSaved();
+      onClose();
+    } catch (err) {
+      console.error("Failed to reschedule", err);
+      setError(err.response?.data?.message || "Failed to reschedule booking.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Modal title="Reschedule Reservation" subtitle={`Update date and time for reservation #${booking.id}`} onClose={onClose} maxWidth={500}>
+      {error && <div style={{ marginBottom: "1rem", padding: ".85rem .95rem", borderRadius: 14, background: `${T.danger}10`, border: `1px solid ${T.danger}26`, color: T.danger, fontSize: ".84rem" }}>{error}</div>}
+      <Field label="New Date" type="date" value={form.booking_date} onChange={set("booking_date")} />
+      <Field label="New Time Slot" value={form.time_slot} onChange={set("time_slot")} options={["08:00–10:00", "10:00–12:00", "13:00–15:00", "15:00–17:00"]} />
+      <Field label="Admin Notes / Reason" value={form.admin_notes} onChange={set("admin_notes")} rows={3} placeholder="Provide a reason for rescheduling..." />
+      <div style={{ display: "flex", gap: ".75rem", justifyContent: "flex-end" }}>
+        <Button variant="outline" onClick={onClose} disabled={saving}>Cancel</Button>
+        <Button variant="primary" icon={LuCalendarDays} onClick={submit} disabled={saving}>{saving ? "Saving…" : "Reschedule"}</Button>
+      </div>
+    </Modal>
+  );
+}
+
 function ReservationsSection() {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionId, setActionId] = useState(null);
   const [error, setError] = useState("");
+  const [rescheduleTarget, setRescheduleTarget] = useState(null);
 
   const load = async () => {
     setLoading(true);
@@ -240,9 +300,10 @@ function ReservationsSection() {
     fmtDate(booking.booking_date || booking.date),
     booking.time_slot || booking.time || "—",
     <BookingStatusBadge key={`status-${booking.id}`} status={booking.status} />,
-    booking.status === "Pending" ? (
+    isPending(booking.status) ? (
       <div key={`actions-${booking.id}`} style={{ display: "flex", gap: ".45rem", flexWrap: "wrap" }}>
         <Button variant="primary" size="sm" icon={LuCheck} onClick={() => handleAction(booking.id, "Approved")} disabled={actionId === booking.id}>Approve</Button>
+        <Button variant="outline" size="sm" icon={LuCalendarDays} onClick={() => setRescheduleTarget(booking)} disabled={actionId === booking.id}>Reschedule</Button>
         <Button variant="danger" size="sm" icon={LuX} onClick={() => handleAction(booking.id, "Rejected")} disabled={actionId === booking.id}>Reject</Button>
       </div>
     ) : (
@@ -264,13 +325,14 @@ function ReservationsSection() {
       ) : (
         <PTable cols={["ID", "User", "Resource", "Date", "Time", "Status", "Actions"]} rows={tableRows} />
       )}
+      <RescheduleModal open={!!rescheduleTarget} booking={rescheduleTarget} onClose={() => setRescheduleTarget(null)} onSaved={load} />
     </SectionFrame>
   );
 }
 
 function EquipmentModal({ open, initial, onClose, onSaved }) {
   const isEdit = Boolean(initial?.id);
-  const [form, setForm] = useState({ name: "", category: "", description: "", spec: "", fee: "", status: "available" });
+  const [form, setForm] = useState({ name: "", category: "", description: "", spec: "", fee: "", status: "available", image_url: "" });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -283,6 +345,7 @@ function EquipmentModal({ open, initial, onClose, onSaved }) {
         spec: initial?.spec || "",
         fee: initial?.fee || "",
         status: initial?.status || "available",
+        image_url: initial?.image_url || ""
       });
       setError("");
       setSaving(false);
@@ -326,6 +389,7 @@ function EquipmentModal({ open, initial, onClose, onSaved }) {
         <Field label="Spec" value={form.spec} onChange={set("spec")} />
         <Field label="Fee" value={form.fee} onChange={set("fee")} />
       </div>
+      <Field label="Image URL" value={form.image_url} onChange={set("image_url")} placeholder="Optional media URL..." />
       <Field label="Status" value={form.status} onChange={set("status")} options={[
         { value: "available", label: "Available" },
         { value: "in-use", label: "In use" },
@@ -728,7 +792,7 @@ function PeopleSection() {
 
 function NewsModal({ open, initial, onClose, onSaved }) {
   const isEdit = Boolean(initial?.id);
-  const [form, setForm] = useState({ category: "", title: "", content: "", published_date: "" });
+  const [form, setForm] = useState({ category: "", title: "", content: "", published_date: "", image_url: "", video_url: "" });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -739,6 +803,8 @@ function NewsModal({ open, initial, onClose, onSaved }) {
         title: initial?.title || "",
         content: initial?.content || "",
         published_date: initial?.published_date ? String(initial.published_date).slice(0, 10) : "",
+        image_url: initial?.image_url || "",
+        video_url: initial?.video_url || ""
       });
       setSaving(false);
       setError("");
@@ -779,6 +845,10 @@ function NewsModal({ open, initial, onClose, onSaved }) {
       </div>
       <Field label="Title" value={form.title} onChange={set("title")} />
       <Field label="Content" value={form.content} onChange={set("content")} rows={5} />
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: ".85rem" }}>
+        <Field label="Image URL" value={form.image_url} onChange={set("image_url")} placeholder="Optional..." />
+        <Field label="Video URL" value={form.video_url} onChange={set("video_url")} placeholder="Optional..." />
+      </div>
       <div style={{ display: "flex", gap: ".75rem", justifyContent: "flex-end" }}>
         <Button variant="outline" onClick={onClose} disabled={saving}>Cancel</Button>
         <Button variant="primary" icon={LuPlus} onClick={submit} disabled={saving}>{saving ? "Saving…" : isEdit ? "Save changes" : "Add news"}</Button>
@@ -868,6 +938,166 @@ function NewsSection() {
   );
 }
 
+function ProjectsModal({ open, initial, onClose, onSaved }) {
+  const isEdit = Boolean(initial?.id);
+  const [form, setForm] = useState({ title: "", description: "", lead_researcher: "", status: "Active", academic_year: "", tags: "", image_url: "", video_url: "", demo_link: "", github_link: "" });
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (open) {
+      setForm({
+        title: initial?.title || "",
+        description: initial?.description || "",
+        lead_researcher: initial?.lead_researcher || "",
+        status: initial?.status || "Active",
+        academic_year: initial?.academic_year || "",
+        tags: initial?.tags ? (Array.isArray(initial.tags) ? initial.tags.join(", ") : initial.tags) : "",
+        image_url: initial?.image_url || "",
+        video_url: initial?.video_url || "",
+        demo_link: initial?.demo_link || "",
+        github_link: initial?.github_link || "",
+      });
+      setSaving(false);
+      setError("");
+    }
+  }, [open, initial]);
+
+  if (!open) return null;
+
+  const set = (key) => (e) => setForm((prev) => ({ ...prev, [key]: e.target.value }));
+
+  const submit = async () => {
+    if (!form.title || !form.lead_researcher) {
+      setError("Title and Lead Researcher are required.");
+      return;
+    }
+    setSaving(true);
+    setError("");
+    try {
+      const payload = { ...form, tags: form.tags.split(",").map(t => t.trim()).filter(Boolean) };
+      if (isEdit) await updateProject(initial.id, payload);
+      else await createProject(payload);
+      onSaved();
+      onClose();
+    } catch (err) {
+      console.error("Failed to save project", err);
+      setError(err.response?.data?.message || "Failed to save project.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Modal title={isEdit ? "Edit project" : "Add project"} subtitle="Publish research and student projects." onClose={onClose} maxWidth={620}>
+      {error && <div style={{ marginBottom: "1rem", padding: ".85rem .95rem", borderRadius: 14, background: `${T.danger}10`, border: `1px solid ${T.danger}26`, color: T.danger, fontSize: ".84rem" }}>{error}</div>}
+      <Field label="Title" value={form.title} onChange={set("title")} />
+      <Field label="Description" value={form.description} onChange={set("description")} rows={3} />
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: ".85rem" }}>
+        <Field label="Lead Researcher" value={form.lead_researcher} onChange={set("lead_researcher")} />
+        <Field label="Academic Year" value={form.academic_year} onChange={set("academic_year")} placeholder="e.g. 2024-2025" />
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: ".85rem" }}>
+        <Field label="Status" value={form.status} onChange={set("status")} options={[{ value: "Active", label: "Active" }, { value: "Completed", label: "Completed" }]} />
+        <Field label="Tags (comma separated)" value={form.tags} onChange={set("tags")} placeholder="SLAM, UAV, PyTorch" />
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: ".85rem" }}>
+        <Field label="Image URL" value={form.image_url} onChange={set("image_url")} placeholder="Optional..." />
+        <Field label="Video URL" value={form.video_url} onChange={set("video_url")} placeholder="Optional..." />
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: ".85rem" }}>
+        <Field label="Demo Link" value={form.demo_link} onChange={set("demo_link")} placeholder="Optional URL..." />
+        <Field label="GitHub Link" value={form.github_link} onChange={set("github_link")} placeholder="Optional URL..." />
+      </div>
+      <div style={{ display: "flex", gap: ".75rem", justifyContent: "flex-end" }}>
+        <Button variant="outline" onClick={onClose} disabled={saving}>Cancel</Button>
+        <Button variant="primary" icon={LuPlus} onClick={submit} disabled={saving}>{saving ? "Saving…" : isEdit ? "Save changes" : "Add project"}</Button>
+      </div>
+    </Modal>
+  );
+}
+
+function ProjectsSection() {
+  const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editing, setEditing] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [confirmBusy, setConfirmBusy] = useState(false);
+  const [confirmError, setConfirmError] = useState("");
+
+  const load = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const response = await getProjects();
+      setRows(response.data || []);
+    } catch (err) {
+      console.error("Failed to load projects", err);
+      setError(err.response?.data?.message || "Failed to load projects.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { load(); }, []);
+
+  const openAdd = () => { setEditing(null); setModalOpen(true); };
+  const openEdit = (project) => { setEditing(project); setModalOpen(true); };
+  const requestDelete = (project) => { setDeleteTarget(project); setConfirmError(""); };
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    setConfirmBusy(true);
+    setConfirmError("");
+    try {
+      await deleteProject(deleteTarget.id);
+      setDeleteTarget(null);
+      await load();
+    } catch (err) {
+      console.error("Failed to delete project", err);
+      setConfirmError(err.response?.data?.message || "Failed to delete project.");
+    } finally {
+      setConfirmBusy(false);
+    }
+  };
+
+  const tableRows = rows.map((project) => [
+    <strong key={`title-${project.id}`}>{project.title}</strong>,
+    project.lead_researcher,
+    project.academic_year,
+    <Badge key={`status-${project.id}`} label={project.status} tone={project.status === "Active" ? "Active" : "Neutral"} />,
+    <div key={`actions-${project.id}`} style={{ display: "flex", gap: ".45rem", flexWrap: "wrap" }}>
+      <Button variant="outline" size="sm" icon={LuPencil} onClick={() => openEdit(project)}>Edit</Button>
+      <Button variant="danger" size="sm" icon={LuTrash2} onClick={() => requestDelete(project)}>Delete</Button>
+    </div>,
+  ]);
+
+  return (
+    <SectionFrame
+      title="Projects"
+      description="Manage the research and student projects shown on the Projects page."
+      actions={<div style={{ display: "flex", gap: ".5rem", flexWrap: "wrap" }}><Button variant="outline" icon={LuRefreshCcw} onClick={load} disabled={loading}>{loading ? "Refreshing…" : "Refresh"}</Button><Button variant="primary" icon={LuPlus} onClick={openAdd}>Add project</Button></div>}
+    >
+      {error && <div style={{ marginBottom: "1rem", padding: ".85rem .95rem", borderRadius: 14, background: `${T.danger}10`, border: `1px solid ${T.danger}26`, color: T.danger, fontSize: ".84rem" }}>{error}</div>}
+      {loading ? <Card style={{ padding: "1.2rem", color: T.textMid }}>Loading projects…</Card> : rows.length === 0 ? <EmptyState title="No projects" desc="Add a project to populate the public directory." /> : <PTable cols={["Title", "Lead", "Year", "Status", "Actions"]} rows={tableRows} />}
+      <ProjectsModal open={modalOpen} initial={editing} onClose={() => setModalOpen(false)} onSaved={load} />
+      {deleteTarget && (
+        <ConfirmModal
+          title={`Delete project: ${deleteTarget.title}`}
+          message="This project will disappear from the public page."
+          confirmLabel="Delete project"
+          onConfirm={confirmDelete}
+          onCancel={() => setDeleteTarget(null)}
+          busy={confirmBusy}
+          error={confirmError}
+        />
+      )}
+    </SectionFrame>
+  );
+}
+
 export function AdminPortal({ active }) {
   if (active === "overview") return <OverviewSection />;
   if (active === "reservations") return <ReservationsSection />;
@@ -875,5 +1105,6 @@ export function AdminPortal({ active }) {
   if (active === "users") return <UsersSection />;
   if (active === "people") return <PeopleSection />;
   if (active === "news") return <NewsSection />;
+  if (active === "projects") return <ProjectsSection />;
   return <OverviewSection />;
 }

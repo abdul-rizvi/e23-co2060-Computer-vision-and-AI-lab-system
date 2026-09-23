@@ -23,6 +23,7 @@ const usersRoutes = require("./routes/usersRoutes");
 const peopleRoutes = require("./routes/peopleRoutes");
 const newsRoutes = require("./routes/newsRoutes");
 const analyticsRoutes = require("./routes/analyticsRoutes");
+const projectsRoutes = require("./routes/projectsRoutes");
 
 // Use routes
 app.use("/api/items", inventoryRoutes);
@@ -32,6 +33,7 @@ app.use("/api/users", usersRoutes);
 app.use("/api/people", peopleRoutes);
 app.use("/api/news", newsRoutes);
 app.use("/api/analytics", analyticsRoutes);
+app.use("/api/projects", projectsRoutes);
 
 // Ensure required tables exist on every server start
 const ensureTables = async () => {

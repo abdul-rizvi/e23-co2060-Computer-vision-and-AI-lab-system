@@ -20,6 +20,7 @@ import { FacilitiesPage }  from "./pages/FacilitiesPage";
 import { NewsPage }        from "./pages/NewsPage";
 import { ServicesPage }    from "./pages/ServicesPage";
 import { ContactPage }     from "./pages/ContactPage";
+import { DocumentationPage } from "./pages/DocumentationPage";
 
 // Portal
 import { PortalSidebar, PortalHeader } from "./portal/PortalLayout";
@@ -78,6 +79,7 @@ function PublicPage({ section, setSection, setShowBooking, setShowLogin }) {
     case "people":       return <PeoplePage />;
     case "facilities":   return <FacilitiesPage />;
     case "news":         return <NewsPage />;
+    case "documentation":return <DocumentationPage />;
     case "services":     return <ServicesPage    setShowBooking={setShowBooking} />;
     case "contact":      return <ContactPage />;
     default:             return <HomePage {...shared} />;

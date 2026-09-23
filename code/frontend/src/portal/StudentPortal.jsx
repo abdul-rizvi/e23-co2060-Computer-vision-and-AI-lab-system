@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { LuCamera, LuClock3, LuQrCode, LuUpload } from "react-icons/lu";
+import { LuCamera, LuClock3, LuQrCode, LuUpload, LuDownload, LuFileText } from "react-icons/lu";
 import { T } from "../styles/theme";
 import { Badge, Button, Card, Field, PTable } from "../components/UI";
-import { EQUIPMENT } from "../data/labData";
-import { createBooking, getBookings, getItems } from "../services/api";
+import { getBookingHistory, getItems, createBooking, getBookings, getNews } from "../services/api"; // Updated imports
 
 function QRPassModal({ booking, onClose }) {
   if (!booking) return null;
@@ -19,8 +18,8 @@ function QRPassModal({ booking, onClose }) {
           <button type="button" className="modal-close" onClick={onClose}>×</button>
         </div>
         <div className="modal-body" style={{ textAlign: "center" }}>
-          <div style={{ border: `1px solid ${T.border}`, padding: "1rem", borderRadius: 18, display: "inline-block", marginBottom: "1rem" }}>
-            <img src={`https://api.qrserver.com/v1/create-qr-code/?size=170x170&data=BOOKING-${booking.id}-${booking.resource}`} alt="QR code" />
+          <div style={{ border: \`1px solid \${T.border}\`, padding: "1rem", borderRadius: 18, display: "inline-block", marginBottom: "1rem" }}>
+            <img src={\`https://api.qrserver.com/v1/create-qr-code/?size=170x170&data=BOOKING-\${booking.id}-\${booking.resource}\`} alt="QR code" />
           </div>
           <Card style={{ textAlign: "left", padding: "1rem", marginBottom: "1rem", background: T.surfaceAlt }}>
             <div><strong>ID:</strong> R-{booking.id}</div>
@@ -43,8 +42,7 @@ function BookingForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [dateError, setDateError] = useState("");
 
-  // Today in YYYY-MM-DD format (local time) — used as the min date
-  const todayStr = new Date().toLocaleDateString("en-CA"); // e.g. "2025-07-21"
+  const todayStr = new Date().toLocaleDateString("en-CA"); 
 
   useEffect(() => {
     const fetchResources = async () => {
@@ -67,10 +65,9 @@ function BookingForm() {
 
     if (!val) { setDateError(""); return; }
 
-    // Parse date parts directly from the string to avoid timezone issues
     const [year, month, day] = val.split("-").map(Number);
-    const picked = new Date(year, month - 1, day); // local date
-    const dayOfWeek = picked.getDay(); // 0 = Sunday, 6 = Saturday
+    const picked = new Date(year, month - 1, day); 
+    const dayOfWeek = picked.getDay(); 
 
     if (dayOfWeek === 0 || dayOfWeek === 6) {
       setDateError("Weekends (Saturday & Sunday) are not available for booking. Please choose a weekday.");
@@ -143,21 +140,49 @@ function UsageHistory() {
     fetchBookings();
   }, []);
 
+  const downloadCSV = () => {
+    if (history.length === 0) return;
+    const headers = ["ID", "Resource", "Date", "Time", "Status", "Notes"];
+    const csvContent = [
+      headers.join(","),
+      ...history.map(b => [
+        \`R-\${b.id}\`,
+        \`"\${b.resource}"\`,
+        new Date(b.booking_date).toLocaleDateString(),
+        \`"\${b.time_slot}"\`,
+        b.status,
+        \`"\${b.admin_notes || ""}"\`
+      ].join(","))
+    ].join("\\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", "my_bookings.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="fade-up">
-      <h2 style={{ margin: 0, fontSize: "1.35rem", color: T.navyDark, marginBottom: "1.15rem" }}>My bookings</h2>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.15rem" }}>
+        <h2 style={{ margin: 0, fontSize: "1.35rem", color: T.navyDark }}>My bookings</h2>
+        <Button variant="outline" size="sm" icon={LuDownload} onClick={downloadCSV}>Download CSV</Button>
+      </div>
       <PTable
         cols={["ID", "Resource", "Date", "Time", "Status", "Pass"]}
         rows={history.map((booking) => [
-          `R-${booking.id}`,
+          \`R-\${booking.id}\`,
           booking.resource,
           new Date(booking.booking_date).toLocaleDateString(),
           booking.time_slot,
-          <Badge key={`status-${booking.id}`} label={booking.status} tone={booking.status === "Approved" ? "Active" : booking.status === "Rejected" ? "Rejected" : "Pending"} />,
+          <Badge key={\`status-\${booking.id}\`} label={booking.status} tone={booking.status === "Approved" ? "Active" : booking.status === "Rejected" ? "Rejected" : "Pending"} />,
           booking.status === "Approved" ? (
-            <Button key={`qr-${booking.id}`} variant="outline" size="sm" icon={LuQrCode} onClick={() => setSelectedQR(booking)}>View pass</Button>
+            <Button key={\`qr-\${booking.id}\`} variant="outline" size="sm" icon={LuQrCode} onClick={() => setSelectedQR(booking)}>View pass</Button>
           ) : (
-            <span key={`na-${booking.id}`} style={{ color: T.textLight, fontSize: ".8rem" }}>N/A</span>
+            <span key={\`na-\${booking.id}\`} style={{ color: T.textLight, fontSize: ".8rem" }}>N/A</span>
           ),
         ])}
       />
@@ -196,14 +221,66 @@ function EquipmentList() {
           cols={["ID", "Name", "Category", "Use Case", "Status"]}
           rows={items.map((it) => [
             it.id,
-            <strong key={`name-${it.id}`} style={{ color: T.navyDark }}>{it.name}</strong>,
-            <Badge key={`cat-${it.id}`} label={it.category} tone="Neutral" />,
-            <div key={`desc-${it.id}`} style={{ maxWidth: 350, whiteSpace: "normal", lineHeight: 1.4, fontSize: "0.85rem", color: T.textLight }}>
+            <strong key={\`name-\${it.id}\`} style={{ color: T.navyDark }}>{it.name}</strong>,
+            <Badge key={\`cat-\${it.id}\`} label={it.category} tone="Neutral" />,
+            <div key={\`desc-\${it.id}\`} style={{ maxWidth: 350, whiteSpace: "normal", lineHeight: 1.4, fontSize: "0.85rem", color: T.textLight }}>
               {it.description}
             </div>,
-            <Badge key={`stat-${it.id}`} label={it.status === "available" ? "Available" : "In Use / Maint."} tone={it.status === "available" ? "Active" : "Neutral"} />
+            <Badge key={\`stat-\${it.id}\`} label={it.status === "available" ? "Available" : "In Use / Maint."} tone={it.status === "available" ? "Active" : "Neutral"} />
           ])}
         />
+      )}
+    </div>
+  );
+}
+
+function LabAnnouncements() {
+  const [news, setNews] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchNews = async () => {
+      try {
+        const response = await getNews();
+        setNews(response.data || []);
+      } catch (error) {
+        console.error("Failed to fetch news:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchNews();
+  }, []);
+
+  return (
+    <div className="fade-up">
+      <h2 style={{ margin: 0, fontSize: "1.35rem", color: T.navyDark, marginBottom: ".35rem" }}>Lab Announcements</h2>
+      <p style={{ color: T.textLight, fontSize: ".9rem", marginBottom: "1.2rem" }}>Latest updates, events, and important notices from the CV & AI Lab.</p>
+      
+      {isLoading ? (
+        <div style={{ color: T.textLight }}>Loading announcements...</div>
+      ) : news.length === 0 ? (
+        <div style={{ color: T.textLight }}>No announcements available at this time.</div>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: "1rem", maxWidth: "800px" }}>
+          {news.map((item) => (
+            <Card key={item.id} style={{ padding: "1.2rem", borderLeft: \`4px solid \${T.gold}\` }}>
+               <div style={{ display: "flex", alignItems: "center", gap: ".6rem", marginBottom: ".5rem" }}>
+                 <Badge label={item.category || "Notice"} tone="Neutral" />
+                 <span style={{ color: T.textLight, fontSize: ".8rem" }}>
+                   {new Date(item.published_date || item.created_at).toLocaleDateString()}
+                 </span>
+               </div>
+               <h3 style={{ margin: "0 0 .5rem 0", color: T.navyDark, fontSize: "1.1rem" }}>{item.title}</h3>
+               <p style={{ margin: 0, color: T.textMid, fontSize: ".9rem", lineHeight: 1.6 }}>{item.content}</p>
+               {(item.image_url || item.video_url) && (
+                 <div style={{ marginTop: "1rem", display: "inline-flex", alignItems: "center", gap: "0.5rem", color: T.navy, fontSize: "0.85rem", fontWeight: 600 }}>
+                   <LuFileText size={16} /> Attached Media Available on Main News Page
+                 </div>
+               )}
+            </Card>
+          ))}
+        </div>
       )}
     </div>
   );
@@ -212,5 +289,6 @@ function EquipmentList() {
 export function StudentPortal({ active }) {
   if (active === "equipment") return <EquipmentList />;
   if (active === "booking") return <BookingForm />;
+  if (active === "announcements") return <LabAnnouncements />;
   return <UsageHistory />;
 }

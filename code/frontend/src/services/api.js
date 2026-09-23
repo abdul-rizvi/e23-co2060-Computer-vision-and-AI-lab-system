@@ -41,4 +41,9 @@ export const createNews = (data) => API.post("/api/news", data);
 export const updateNews = (id, data) => API.put(`/api/news/${id}`, data);
 export const deleteNews = (id) => API.delete(`/api/news/${id}`);
 
+export const getProjects = () => API.get("/api/projects");
+export const createProject = (data) => API.post("/api/projects", data);
+export const updateProject = (id, data) => API.put(`/api/projects/${id}`, data);
+export const deleteProject = (id) => API.delete(`/api/projects/${id}`);
+
 export default API;

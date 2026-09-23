@@ -3,6 +3,7 @@ import { T } from "../styles/theme";
 import { Badge, Card, Divider, SectionLabel, SectionTitle } from "../components/UI";
 import { NEWS_ITEMS } from "../data/labData";
 import { getNews } from "../services/api";
+import { LuVideo } from "react-icons/lu";
 
 function formatNewsDate(value) {
   if (!value) return "";
@@ -13,15 +14,19 @@ function formatNewsDate(value) {
 
 function normalizeNews(rows) {
   return Array.isArray(rows) ? rows.map((item) => ({
+    id: item.id,
     category: item.category || item.type || "News",
     title: item.title,
     content: item.content || item.desc || "",
     published_date: item.published_date || item.date,
+    image_url: item.image_url,
+    video_url: item.video_url
   })) : [];
 }
 
 export function NewsPage() {
   const [news, setNews] = useState(NEWS_ITEMS);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
@@ -32,6 +37,8 @@ export function NewsPage() {
         if (!cancelled && rows.length > 0) setNews(rows);
       } catch (error) {
         console.error("Failed to fetch news", error);
+      } finally {
+        if (!cancelled) setLoading(false);
       }
     };
     loadNews();
@@ -43,18 +50,40 @@ export function NewsPage() {
       <SectionLabel text="News" />
       <SectionTitle>Latest updates and events</SectionTitle>
       <Divider />
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1rem" }}>
-        {news.map((item) => (
-          <Card key={item.title} style={{ padding: "1.2rem", borderTop: `3px solid ${T.gold}` }}>
-            <div style={{ display: "flex", alignItems: "center", gap: ".6rem", marginBottom: ".7rem", flexWrap: "wrap" }}>
-              <Badge label={item.category} tone="Pending" />
-              <span style={{ color: T.textLight, fontSize: ".77rem" }}>{formatNewsDate(item.published_date || item.date)}</span>
-            </div>
-            <div style={{ fontWeight: 700, color: T.navyDark, lineHeight: 1.5 }}>{item.title}</div>
-            <p style={{ color: T.textMid, lineHeight: 1.7, fontSize: ".88rem", marginBottom: 0 }}>{item.content}</p>
-          </Card>
-        ))}
-      </div>
+      
+      {loading ? (
+        <div style={{ color: T.textMid }}>Loading news...</div>
+      ) : (
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "1.5rem" }}>
+          {news.map((item, idx) => (
+            <Card key={item.id || idx} style={{ borderTop: \`3px solid \${T.gold}\`, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+              {/* Media Section */}
+              {item.image_url ? (
+                <div style={{ width: "100%", height: "200px", background: T.surfaceAlt }}>
+                  <img src={item.image_url} alt={item.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                </div>
+              ) : item.video_url ? (
+                <div style={{ width: "100%", height: "200px", background: T.surfaceAlt, display: "flex", alignItems: "center", justifyContent: "center", borderBottom: \`1px solid \${T.border}\` }}>
+                   <a href={item.video_url} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: T.navy, textDecoration: 'none' }}>
+                     <LuVideo size={36} style={{ marginBottom: '8px' }} />
+                     <span>Watch Video</span>
+                   </a>
+                </div>
+              ) : null}
+              
+              {/* Content Section */}
+              <div style={{ padding: "1.2rem", flexGrow: 1, display: "flex", flexDirection: "column" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: ".6rem", marginBottom: ".7rem", flexWrap: "wrap" }}>
+                  <Badge label={item.category} tone="Pending" />
+                  <span style={{ color: T.textLight, fontSize: ".77rem" }}>{formatNewsDate(item.published_date || item.date)}</span>
+                </div>
+                <div style={{ fontWeight: 700, color: T.navyDark, lineHeight: 1.5, fontSize: "1.1rem", marginBottom: "0.5rem" }}>{item.title}</div>
+                <p style={{ color: T.textMid, lineHeight: 1.7, fontSize: ".9rem", marginBottom: 0, flexGrow: 1 }}>{item.content}</p>
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

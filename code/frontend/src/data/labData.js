@@ -370,6 +370,7 @@ export const PORTAL_MENUS = {
     { id: "equipment", iconKey: "equipment", label: "Equipments" },
     { id: "booking", iconKey: "booking", label: "Book Resource" },
     { id: "history", iconKey: "bookings", label: "My Bookings" },
+    { id: "announcements", iconKey: "news", label: "Announcements" },
   ],
   officer: [
     { id: "booking-requests", iconKey: "booking-requests", label: "Booking Requests" },
