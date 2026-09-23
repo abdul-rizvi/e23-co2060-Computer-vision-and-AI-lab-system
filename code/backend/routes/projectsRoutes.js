@@ -7,8 +7,8 @@ const { verifyToken, requireRole } = require("../middleware/authMiddleware");
 router.get("/", getAllProjects);
 
 // Protected routes
-router.post("/", verifyToken, requireRole(["admin", "officer"]), createProject);
-router.put("/:id", verifyToken, requireRole(["admin", "officer"]), updateProject);
-router.delete("/:id", verifyToken, requireRole(["admin", "officer"]), deleteProject);
+router.post("/", verifyToken, requireRole("admin", "officer"), createProject);
+router.put("/:id", verifyToken, requireRole("admin", "officer"), updateProject);
+router.delete("/:id", verifyToken, requireRole("admin", "officer"), deleteProject);
 
 module.exports = router;

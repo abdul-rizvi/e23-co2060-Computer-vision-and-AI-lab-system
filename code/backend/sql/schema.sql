@@ -81,6 +81,7 @@ CREATE TABLE projects (
     description TEXT,
     lead VARCHAR(100),
     supervisor VARCHAR(100),
+    team_members TEXT,
     tags TEXT,
     year VARCHAR(20),
     status VARCHAR(50),
