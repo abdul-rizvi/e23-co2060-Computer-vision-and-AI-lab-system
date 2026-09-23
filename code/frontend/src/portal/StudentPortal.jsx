@@ -3,7 +3,8 @@ import { createPortal } from "react-dom";
 import { LuCamera, LuClock3, LuQrCode, LuUpload, LuDownload, LuFileText } from "react-icons/lu";
 import { T } from "../styles/theme";
 import { Badge, Button, Card, Field, PTable } from "../components/UI";
-import { getBookingHistory, getItems, createBooking, getBookings, getNews } from "../services/api"; // Updated imports
+import { getItems, createBooking, getMyBookings, getNews } from "../services/api";
+import { bookingsToCSV, bookingQRUrl } from "../utils/bookingExport";
 
 function QRPassModal({ booking, onClose }) {
   if (!booking) return null;
@@ -18,8 +19,8 @@ function QRPassModal({ booking, onClose }) {
           <button type="button" className="modal-close" onClick={onClose}>×</button>
         </div>
         <div className="modal-body" style={{ textAlign: "center" }}>
-          <div style={{ border: \`1px solid \${T.border}\`, padding: "1rem", borderRadius: 18, display: "inline-block", marginBottom: "1rem" }}>
-            <img src={\`https://api.qrserver.com/v1/create-qr-code/?size=170x170&data=BOOKING-\${booking.id}-\${booking.resource}\`} alt="QR code" />
+          <div style={{ border: `1px solid ${T.border}`, padding: "1rem", borderRadius: 18, display: "inline-block", marginBottom: "1rem" }}>
+            <img src={bookingQRUrl(booking)} alt="QR code" />
           </div>
           <Card style={{ textAlign: "left", padding: "1rem", marginBottom: "1rem", background: T.surfaceAlt }}>
             <div><strong>ID:</strong> R-{booking.id}</div>
@@ -37,7 +38,7 @@ function QRPassModal({ booking, onClose }) {
 
 
 function BookingForm() {
-  const [options, setOptions] = useState(["Training Run (A100)", "Consultation - CV Methodology", "Lab Space Access"]);
+  const [options, setOptions] = useState(["High Performance Server", "Training Run (A100)", "Consultation - CV Methodology", "Lab Space Access"]);
   const [form, setForm] = useState({ resource: "", date: "", time: "", purpose: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [dateError, setDateError] = useState("");
@@ -49,7 +50,7 @@ function BookingForm() {
       try {
         const response = await getItems();
         const dbItems = response.data.map((item) => item.name);
-        setOptions([...dbItems, "Training Run (A100)", "Consultation - CV Methodology", "Lab Space Access"]);
+        setOptions([...new Set([...dbItems, "High Performance Server", "Training Run (A100)", "Consultation - CV Methodology", "Lab Space Access"])]);
       } catch (error) {
         console.error("Failed to fetch dynamic resources:", error);
       }
@@ -77,8 +78,8 @@ function BookingForm() {
   };
 
   const handleSubmit = async () => {
-    if (!form.resource || !form.date || !form.time) {
-      alert("Please select a resource, date, and time slot.");
+    if (!form.resource || !form.date || !form.time || !form.purpose.trim()) {
+      alert("Please select a resource, date, and time slot, and enter a purpose.");
       return;
     }
     if (dateError) {
@@ -93,7 +94,7 @@ function BookingForm() {
       setForm({ resource: "", date: "", time: "", purpose: "" });
     } catch (error) {
       console.error("Booking error:", error);
-      alert("Failed to submit the booking request.");
+      alert(error.response?.data?.message || "Failed to submit the booking request.");
     } finally {
       setIsSubmitting(false);
     }
@@ -127,14 +128,20 @@ function BookingForm() {
 function UsageHistory() {
   const [history, setHistory] = useState([]);
   const [selectedQR, setSelectedQR] = useState(null);
+  const [filter, setFilter] = useState("All");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchBookings = async () => {
       try {
-        const response = await getBookings();
+        const response = await getMyBookings();
         setHistory(response.data);
       } catch (error) {
         console.error("Failed to load bookings", error);
+        setError("Your bookings could not be loaded. Please reopen this page to retry.");
+      } finally {
+        setLoading(false);
       }
     };
     fetchBookings();
@@ -142,18 +149,7 @@ function UsageHistory() {
 
   const downloadCSV = () => {
     if (history.length === 0) return;
-    const headers = ["ID", "Resource", "Date", "Time", "Status", "Notes"];
-    const csvContent = [
-      headers.join(","),
-      ...history.map(b => [
-        \`R-\${b.id}\`,
-        \`"\${b.resource}"\`,
-        new Date(b.booking_date).toLocaleDateString(),
-        \`"\${b.time_slot}"\`,
-        b.status,
-        \`"\${b.admin_notes || ""}"\`
-      ].join(","))
-    ].join("\\n");
+    const csvContent = bookingsToCSV(history);
 
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
@@ -163,26 +159,32 @@ function UsageHistory() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    setTimeout(() => URL.revokeObjectURL(url), 0);
   };
 
   return (
     <div className="fade-up">
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.15rem" }}>
         <h2 style={{ margin: 0, fontSize: "1.35rem", color: T.navyDark }}>My bookings</h2>
-        <Button variant="outline" size="sm" icon={LuDownload} onClick={downloadCSV}>Download CSV</Button>
+        <Button variant="outline" size="sm" icon={LuDownload} onClick={downloadCSV} disabled={loading || !!error || history.length === 0}>Download CSV</Button>
       </div>
+      <Field label="Filter bookings" value={filter} onChange={e => setFilter(e.target.value)} options={["All", "Pending", "Approved", "Rejected", "Rescheduled"]} />
+      {loading && <p>Loading bookings…</p>}
+      {error && <p role="alert">{error}</p>}
+      {!loading && !error && history.filter(booking => filter === "All" || booking.status === filter).length === 0 && <p>No reservations match this filter.</p>}
       <PTable
-        cols={["ID", "Resource", "Date", "Time", "Status", "Pass"]}
-        rows={history.map((booking) => [
-          \`R-\${booking.id}\`,
+        cols={["ID", "Resource", "Date", "Time", "Status", "Staff notes", "Pass"]}
+        rows={history.filter(booking => filter === "All" || booking.status === filter).map((booking) => [
+          `R-${booking.id}`,
           booking.resource,
           new Date(booking.booking_date).toLocaleDateString(),
           booking.time_slot,
-          <Badge key={\`status-\${booking.id}\`} label={booking.status} tone={booking.status === "Approved" ? "Active" : booking.status === "Rejected" ? "Rejected" : "Pending"} />,
+          <Badge key={`status-${booking.id}`} label={booking.status} tone={booking.status === "Approved" ? "Active" : booking.status === "Rejected" ? "Rejected" : booking.status === "Rescheduled" ? "Rescheduled" : "Pending"} />,
+          booking.admin_notes || "—",
           booking.status === "Approved" ? (
-            <Button key={\`qr-\${booking.id}\`} variant="outline" size="sm" icon={LuQrCode} onClick={() => setSelectedQR(booking)}>View pass</Button>
+            <Button key={`qr-${booking.id}`} variant="outline" size="sm" icon={LuQrCode} onClick={() => setSelectedQR(booking)}>View pass</Button>
           ) : (
-            <span key={\`na-\${booking.id}\`} style={{ color: T.textLight, fontSize: ".8rem" }}>N/A</span>
+            <span key={`na-${booking.id}`} style={{ color: T.textLight, fontSize: ".8rem" }}>N/A</span>
           ),
         ])}
       />
@@ -221,12 +223,12 @@ function EquipmentList() {
           cols={["ID", "Name", "Category", "Use Case", "Status"]}
           rows={items.map((it) => [
             it.id,
-            <strong key={\`name-\${it.id}\`} style={{ color: T.navyDark }}>{it.name}</strong>,
-            <Badge key={\`cat-\${it.id}\`} label={it.category} tone="Neutral" />,
-            <div key={\`desc-\${it.id}\`} style={{ maxWidth: 350, whiteSpace: "normal", lineHeight: 1.4, fontSize: "0.85rem", color: T.textLight }}>
+            <strong key={`name-${it.id}`} style={{ color: T.navyDark }}>{it.name}</strong>,
+            <Badge key={`cat-${it.id}`} label={it.category} tone="Neutral" />,
+            <div key={`desc-${it.id}`} style={{ maxWidth: 350, whiteSpace: "normal", lineHeight: 1.4, fontSize: "0.85rem", color: T.textLight }}>
               {it.description}
             </div>,
-            <Badge key={\`stat-\${it.id}\`} label={it.status === "available" ? "Available" : "In Use / Maint."} tone={it.status === "available" ? "Active" : "Neutral"} />
+            <Badge key={`stat-${it.id}`} label={it.status === "available" ? "Available" : "In Use / Maint."} tone={it.status === "available" ? "Active" : "Neutral"} />
           ])}
         />
       )}
@@ -264,7 +266,7 @@ function LabAnnouncements() {
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: "1rem", maxWidth: "800px" }}>
           {news.map((item) => (
-            <Card key={item.id} style={{ padding: "1.2rem", borderLeft: \`4px solid \${T.gold}\` }}>
+            <Card key={item.id} style={{ padding: "1.2rem", borderLeft: `4px solid ${T.gold}` }}>
                <div style={{ display: "flex", alignItems: "center", gap: ".6rem", marginBottom: ".5rem" }}>
                  <Badge label={item.category || "Notice"} tone="Neutral" />
                  <span style={{ color: T.textLight, fontSize: ".8rem" }}>

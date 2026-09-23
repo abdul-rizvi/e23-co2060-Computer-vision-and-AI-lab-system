@@ -1,3 +1,4 @@
+import { Statistics } from "./Statistics";
 import { useEffect, useState } from "react";
 import {
   LuCheck, LuPencil, LuPlus, LuRefreshCcw, LuTrash2,
@@ -170,15 +171,17 @@ function BookingRequestsSection() {
   const tableRows = rows.map((booking) => [
     `#${booking.id}`,
     booking.user_name || "Student",
+    booking.user_email || "—",
+    booking.purpose || "—",
     booking.resource,
     fmtDate(booking.booking_date || booking.date),
     booking.time_slot || booking.time || "—",
     <Badge
       key={`status-${booking.id}`}
       label={booking.status || "Pending"}
-      tone={isPending(booking.status) ? "Pending" : String(booking.status).toLowerCase() === "approved" ? "Active" : "Rejected"}
+      tone={isPending(booking.status) ? "Pending" : String(booking.status).toLowerCase() === "approved" ? "Active" : booking.status === "Rescheduled" ? "Rescheduled" : "Rejected"}
     />,
-    isPending(booking.status) ? (
+    ["pending", "rescheduled", "approved"].includes(String(booking.status).toLowerCase()) ? (
       <div key={`act-${booking.id}`} style={{ display: "flex", gap: ".45rem", flexWrap: "wrap" }}>
         <Button variant="primary" size="sm" icon={LuCheck} onClick={() => handleAction(booking.id, "Approved")} disabled={actionId === booking.id}>Approve</Button>
         <Button variant="outline" size="sm" icon={LuCalendarDays} onClick={() => setRescheduleTarget(booking)} disabled={actionId === booking.id}>Reschedule</Button>
@@ -207,7 +210,7 @@ function BookingRequestsSection() {
       ) : rows.length === 0 ? (
         <EmptyState title="No booking requests" desc="No students have submitted booking requests yet." />
       ) : (
-        <PTable cols={["ID", "Student", "Resource", "Date", "Time", "Status", "Actions"]} rows={tableRows} />
+        <PTable cols={["ID", "Student", "Email", "Purpose", "Resource", "Date", "Time", "Status", "Actions"]} rows={tableRows} />
       )}
       <RescheduleModal open={!!rescheduleTarget} booking={rescheduleTarget} onClose={() => setRescheduleTarget(null)} onSaved={load} />
     </SectionFrame>
@@ -397,6 +400,7 @@ function EquipmentSection() {
 
 // ─── Export ─────────────────────────────────────────────────────
 export function OfficerPortal({ active }) {
+  if (active === "overview") return <Statistics />;
   if (active === "equipment") return <EquipmentSection />;
   return <BookingRequestsSection />;  // default to booking-requests
 }

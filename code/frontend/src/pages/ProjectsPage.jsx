@@ -1,7 +1,8 @@
+import { VideoMedia } from "../components/VideoMedia";
 import { useState, useEffect } from "react";
 import { T } from "../styles/theme";
 import { Badge, Button, Card, Divider, SectionLabel, SectionTitle } from "../components/UI";
-import { LuChevronRight, LuGithub, LuExternalLink, LuVideo } from "react-icons/lu";
+import { LuChevronRight, LuGithub, LuExternalLink } from "react-icons/lu";
 import { getProjects } from "../services/api";
 
 export function ProjectsPage() {
@@ -50,7 +51,7 @@ export function ProjectsPage() {
             const tagsList = project.tags ? (typeof project.tags === 'string' ? project.tags.split(',').map(t => t.trim()) : project.tags) : [];
             
             return (
-              <Card key={project.id} style={{ padding: "1.2rem", borderLeft: \`4px solid \${project.status === "Active" ? T.success : T.textLight}\` }}>
+              <Card key={project.id} style={{ padding: "1.2rem", borderLeft: `4px solid ${project.status === "Active" ? T.success : T.textLight}` }}>
                 <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
                   {/* Media Section */}
                   {(project.image_url || project.video_url) && (
@@ -60,14 +61,7 @@ export function ProjectsPage() {
                           <img src={project.image_url} alt={project.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                         </div>
                       )}
-                      {project.video_url && (
-                        <div style={{ height: "200px", minWidth: "300px", borderRadius: "8px", overflow: "hidden", background: T.surfaceAlt, display: "flex", alignItems: "center", justifyContent: "center", border: \`1px solid \${T.border}\`, flexShrink: 0 }}>
-                           <a href={project.video_url} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: T.navy, textDecoration: 'none' }}>
-                             <LuVideo size={32} style={{ marginBottom: '8px' }} />
-                             <span>Watch Video</span>
-                           </a>
-                        </div>
-                      )}
+                      <VideoMedia url={project.video_url} title={project.title} />
                     </div>
                   )}
 
@@ -80,7 +74,8 @@ export function ProjectsPage() {
                       </div>
                       <h3 style={{ margin: 0, color: T.navyDark, fontSize: "1.12rem" }}>{project.title}</h3>
                       <div style={{ color: T.textLight, fontSize: ".8rem", marginTop: ".25rem" }}>
-                        Lead: {project.lead || "N/A"} {project.supervisor && \`| Supervisor: \${project.supervisor}\`}
+                        Team: {project.team_members || "Not listed"}<br />
+                        Lead: {project.lead || "N/A"} {project.supervisor && `| Supervisor: ${project.supervisor}`}
                       </div>
                       <p style={{ color: T.textMid, fontSize: ".88rem", lineHeight: 1.7, marginTop: ".55rem", marginBottom: 0 }}>{project.description}</p>
                       
@@ -102,7 +97,7 @@ export function ProjectsPage() {
                     </div>
                     <div style={{ display: "flex", flexWrap: "wrap", gap: ".4rem", maxWidth: 180 }}>
                       {tagsList.map((tag, idx) => (
-                        <span key={idx} style={{ padding: ".28rem .55rem", borderRadius: 999, background: T.surfaceAlt, border: \`1px solid \${T.border}\`, color: T.navy, fontSize: ".72rem", fontWeight: 600 }}>{tag}</span>
+                        <span key={idx} style={{ padding: ".28rem .55rem", borderRadius: 999, background: T.surfaceAlt, border: `1px solid ${T.border}`, color: T.navy, fontSize: ".72rem", fontWeight: 600 }}>{tag}</span>
                       ))}
                     </div>
                   </div>

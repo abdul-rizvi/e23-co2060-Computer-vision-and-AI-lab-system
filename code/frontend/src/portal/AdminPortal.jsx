@@ -1,3 +1,4 @@
+import { Statistics } from "./Statistics";
 import { useEffect, useState } from "react";
 import { LuCalendarClock, LuCheck, LuFileText, LuPencil, LuPlus, LuRefreshCcw, LuTrash2, LuUsers, LuWrench, LuX, LuLayers3, LuCalendarDays } from "react-icons/lu";
 import { T } from "../styles/theme";
@@ -73,7 +74,7 @@ function ConfirmModal({ title, message, confirmLabel = "Delete", confirmTone = "
 }
 
 function BookingStatusBadge({ status }) {
-  return <Badge label={status || "Pending"} tone={isPending(status) ? "Pending" : String(status).toLowerCase() === "approved" ? "Active" : "Rejected"} />;
+  return <Badge label={status || "Pending"} tone={isPending(status) ? "Pending" : String(status).toLowerCase() === "approved" ? "Active" : status === "Rescheduled" ? "Rescheduled" : "Rejected"} />;
 }
 
 function OverviewSection() {
@@ -146,6 +147,7 @@ function OverviewSection() {
       description="A live snapshot of the public directory, content feeds, equipment inventory, and booking queue."
       actions={<Button variant="outline" icon={LuRefreshCcw} onClick={load} disabled={loading}>{loading ? "Refreshing…" : "Refresh"}</Button>}
     >
+      <Statistics />
       {error && <div style={{ marginBottom: "1rem", padding: ".85rem .95rem", borderRadius: 14, background: `${T.warning}10`, border: `1px solid ${T.warning}26`, color: T.warning, fontSize: ".84rem" }}>{error}</div>}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(5, minmax(0, 1fr))", gap: "1rem", marginBottom: "1rem" }}>
         {cards.map((card) => <PStat key={card.label} label={card.label} value={loading ? "—" : card.value} icon={card.icon} color={card.color} />)}
@@ -296,11 +298,13 @@ function ReservationsSection() {
   const tableRows = rows.map((booking) => [
     `#${booking.id}`,
     booking.user_name || booking.name || booking.user || "Student",
+    booking.user_email || "—",
+    booking.purpose || "—",
     booking.resource,
     fmtDate(booking.booking_date || booking.date),
     booking.time_slot || booking.time || "—",
     <BookingStatusBadge key={`status-${booking.id}`} status={booking.status} />,
-    isPending(booking.status) ? (
+    ["pending", "rescheduled", "approved"].includes(String(booking.status).toLowerCase()) ? (
       <div key={`actions-${booking.id}`} style={{ display: "flex", gap: ".45rem", flexWrap: "wrap" }}>
         <Button variant="primary" size="sm" icon={LuCheck} onClick={() => handleAction(booking.id, "Approved")} disabled={actionId === booking.id}>Approve</Button>
         <Button variant="outline" size="sm" icon={LuCalendarDays} onClick={() => setRescheduleTarget(booking)} disabled={actionId === booking.id}>Reschedule</Button>
@@ -323,7 +327,7 @@ function ReservationsSection() {
       ) : rows.length === 0 ? (
         <EmptyState title="No reservations" desc="There are no booking requests in the system yet." />
       ) : (
-        <PTable cols={["ID", "User", "Resource", "Date", "Time", "Status", "Actions"]} rows={tableRows} />
+        <PTable cols={["ID", "User", "Email", "Purpose", "Resource", "Date", "Time", "Status", "Actions"]} rows={tableRows} />
       )}
       <RescheduleModal open={!!rescheduleTarget} booking={rescheduleTarget} onClose={() => setRescheduleTarget(null)} onSaved={load} />
     </SectionFrame>
@@ -940,7 +944,7 @@ function NewsSection() {
 
 function ProjectsModal({ open, initial, onClose, onSaved }) {
   const isEdit = Boolean(initial?.id);
-  const [form, setForm] = useState({ title: "", description: "", lead_researcher: "", status: "Active", academic_year: "", tags: "", image_url: "", video_url: "", demo_link: "", github_link: "" });
+  const [form, setForm] = useState({ title: "", description: "", lead: "", supervisor: "", team_members: "", status: "Active", year: "", tags: "", image_url: "", video_url: "", demo_link: "", github_link: "" });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -949,9 +953,11 @@ function ProjectsModal({ open, initial, onClose, onSaved }) {
       setForm({
         title: initial?.title || "",
         description: initial?.description || "",
-        lead_researcher: initial?.lead_researcher || "",
+        lead: initial?.lead || "",
+        supervisor: initial?.supervisor || "",
+        team_members: initial?.team_members || "",
         status: initial?.status || "Active",
-        academic_year: initial?.academic_year || "",
+        year: initial?.year || "",
         tags: initial?.tags ? (Array.isArray(initial.tags) ? initial.tags.join(", ") : initial.tags) : "",
         image_url: initial?.image_url || "",
         video_url: initial?.video_url || "",
@@ -968,14 +974,14 @@ function ProjectsModal({ open, initial, onClose, onSaved }) {
   const set = (key) => (e) => setForm((prev) => ({ ...prev, [key]: e.target.value }));
 
   const submit = async () => {
-    if (!form.title || !form.lead_researcher) {
+    if (!form.title || !form.lead) {
       setError("Title and Lead Researcher are required.");
       return;
     }
     setSaving(true);
     setError("");
     try {
-      const payload = { ...form, tags: form.tags.split(",").map(t => t.trim()).filter(Boolean) };
+      const payload = { ...form, tags: form.tags.trim() };
       if (isEdit) await updateProject(initial.id, payload);
       else await createProject(payload);
       onSaved();
@@ -992,10 +998,13 @@ function ProjectsModal({ open, initial, onClose, onSaved }) {
     <Modal title={isEdit ? "Edit project" : "Add project"} subtitle="Publish research and student projects." onClose={onClose} maxWidth={620}>
       {error && <div style={{ marginBottom: "1rem", padding: ".85rem .95rem", borderRadius: 14, background: `${T.danger}10`, border: `1px solid ${T.danger}26`, color: T.danger, fontSize: ".84rem" }}>{error}</div>}
       <Field label="Title" value={form.title} onChange={set("title")} />
+      <Field label="Team members" value={form.team_members} onChange={set("team_members")} placeholder="Names separated by commas" />
+      <Field label="Supervisor" value={form.supervisor} onChange={set("supervisor")} />
+
       <Field label="Description" value={form.description} onChange={set("description")} rows={3} />
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: ".85rem" }}>
-        <Field label="Lead Researcher" value={form.lead_researcher} onChange={set("lead_researcher")} />
-        <Field label="Academic Year" value={form.academic_year} onChange={set("academic_year")} placeholder="e.g. 2024-2025" />
+        <Field label="Lead Researcher" value={form.lead} onChange={set("lead")} />
+        <Field label="Academic Year" value={form.year} onChange={set("year")} placeholder="e.g. 2024-2025" />
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: ".85rem" }}>
         <Field label="Status" value={form.status} onChange={set("status")} options={[{ value: "Active", label: "Active" }, { value: "Completed", label: "Completed" }]} />
@@ -1065,8 +1074,8 @@ function ProjectsSection() {
 
   const tableRows = rows.map((project) => [
     <strong key={`title-${project.id}`}>{project.title}</strong>,
-    project.lead_researcher,
-    project.academic_year,
+    project.lead,
+    project.year,
     <Badge key={`status-${project.id}`} label={project.status} tone={project.status === "Active" ? "Active" : "Neutral"} />,
     <div key={`actions-${project.id}`} style={{ display: "flex", gap: ".45rem", flexWrap: "wrap" }}>
       <Button variant="outline" size="sm" icon={LuPencil} onClick={() => openEdit(project)}>Edit</Button>

@@ -1,3 +1,5 @@
+import { VirtualLabTour } from "../components/VirtualLabTour";
+import { EquipmentPhoto } from "../components/EquipmentPhoto";
 import { useState, useEffect } from "react";
 import { T } from "../styles/theme";
 import { Card, Divider, SectionLabel, SectionTitle } from "../components/UI";
@@ -41,42 +43,27 @@ export function FacilitiesPage() {
             // Map category to a default icon if not explicitly set
             const Icon = ICONS.equipmentAccess; // Default icon
             return (
-              <Card key={item.id} style={{ padding: "1.2rem", borderTop: \`3px solid \${isAvail ? T.success : T.warning}\`, display: "flex", flexDirection: "column" }}>
-                {item.image_url && (
-                  <div style={{ width: "100%", height: "160px", marginBottom: "1rem", borderRadius: "8px", overflow: "hidden", background: T.surfaceAlt }}>
-                    <img src={item.image_url} alt={item.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                  </div>
-                )}
+              <Card key={item.id} style={{ padding: "1.2rem", borderTop: `3px solid ${isAvail ? T.success : T.warning}`, display: "flex", flexDirection: "column" }}>
+                <EquipmentPhoto item={item} />
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start", gap: "1rem", marginBottom: ".8rem" }}>
-                  <div style={{ width: 44, height: 44, borderRadius: 14, background: \`\${T.navy}10\`, color: T.navy, display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{renderIcon(Icon, { size: 19 })}</div>
-                  <span style={{ padding: ".32rem .6rem", borderRadius: 999, background: isAvail ? \`\${T.success}12\` : \`\${T.warning}12\`, color: isAvail ? T.success : T.warning, border: \`1px solid \${isAvail ? \`\${T.success}26\` : \`\${T.warning}26\`}\`, fontSize: ".72rem", fontWeight: 700, whiteSpace: "nowrap" }}>{isAvail ? "Available" : "In use"}</span>
+                  <div style={{ width: 44, height: 44, borderRadius: 14, background: `${T.navy}10`, color: T.navy, display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{renderIcon(Icon, { size: 19 })}</div>
+                  <span style={{ padding: ".32rem .6rem", borderRadius: 999, background: isAvail ? `${T.success}12` : `${T.warning}12`, color: isAvail ? T.success : T.warning, border: `1px solid ${isAvail ? `${T.success}26` : `${T.warning}26`}`, fontSize: ".72rem", fontWeight: 700, whiteSpace: "nowrap" }}>{isAvail ? "Available" : "In use"}</span>
                 </div>
                 <div style={{ fontWeight: 700, color: T.navyDark, fontSize: ".98rem" }}>{item.name}</div>
                 <div style={{ color: T.textMid, fontSize: ".86rem", marginTop: ".35rem", flexGrow: 1 }}>{item.description || item.spec}</div>
-                <div style={{ color: T.textLight, fontSize: ".79rem", marginTop: ".8rem" }}>Category: {item.category} {item.fee && \`· Fee: \${item.fee}\`}</div>
+                <div style={{ color: T.textLight, fontSize: ".79rem", marginTop: ".8rem" }}>Category: {item.category} {item.fee && `· Fee: ${item.fee}`}</div>
               </Card>
             );
           })}
         </div>
       )}
 
-      <SectionTitle>360° Virtual Lab Walkthrough</SectionTitle>
+      <SectionTitle>Virtual Lab Walkthrough</SectionTitle>
       <Divider />
       <p style={{ color: T.textMid, fontSize: ".96rem", lineHeight: 1.8, maxWidth: 760, marginBottom: "1.4rem" }}>
         Take a virtual tour of our lab facilities and explore the space.
       </p>
-      <div style={{ width: "100%", maxWidth: "900px", aspectRatio: "16/9", background: T.surfaceAlt, borderRadius: "12px", display: "flex", alignItems: "center", justifyContent: "center", border: \`1px solid \${T.border}\`, overflow: "hidden" }}>
-         {/* Dummy 360 viewer - using an iframe to a sample 360 video */}
-         <iframe 
-            width="100%" 
-            height="100%" 
-            src="https://www.youtube.com/embed/tcjZ3Z2r0R8" 
-            title="360 Virtual Lab Tour (Demo)" 
-            frameBorder="0" 
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-            allowFullScreen
-          ></iframe>
-      </div>
+      <VirtualLabTour />
     </div>
   );
 }
