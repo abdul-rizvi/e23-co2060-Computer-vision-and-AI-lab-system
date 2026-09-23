@@ -26,7 +26,6 @@ const getAnalytics = async (req, res) => {
                     COUNT(*) FILTER (WHERE role = 'student')               AS students,
                     COUNT(*) FILTER (WHERE role = 'officer')               AS officers,
                     COUNT(*) FILTER (WHERE role = 'admin')                 AS admins,
-                    COUNT(*) FILTER (WHERE role = 'professor')             AS professors,
                     COUNT(*) FILTER (WHERE role = 'staff')                 AS staff
                 FROM users
             `),
@@ -67,7 +66,6 @@ const getAnalytics = async (req, res) => {
                 students:   Number(users.students),
                 officers:   Number(users.officers),
                 admins:     Number(users.admins),
-                professors: Number(users.professors),
                 staff:      Number(users.staff),
             },
             content: {

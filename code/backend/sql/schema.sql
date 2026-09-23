@@ -2,7 +2,6 @@
 DROP TABLE IF EXISTS news;
 DROP TABLE IF EXISTS people;
 DROP TABLE IF EXISTS reservations;
-DROP TABLE IF EXISTS bookings;
 DROP TABLE IF EXISTS inventory;
 DROP TABLE IF EXISTS users;
 
@@ -12,7 +11,7 @@ CREATE TABLE users (
     name VARCHAR(100),
     email VARCHAR(100) UNIQUE NOT NULL,
     password TEXT NOT NULL,
-    role VARCHAR(20) CHECK (role IN ('student','professor','officer', 'admin', 'staff')) NOT NULL
+    role VARCHAR(20) CHECK (role IN ('student','officer', 'admin', 'staff')) NOT NULL
 );
 
 -- 2. Inventory / Items Table
