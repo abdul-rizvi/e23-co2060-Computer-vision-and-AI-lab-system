@@ -91,7 +91,7 @@ const seed = async () => {
       await pool.query(
         `INSERT INTO inventory (name, category, description, status)
          VALUES ($1, $2, $3, $4)
-         ON CONFLICT DO NOTHING`,
+         ON CONFLICT (name) DO NOTHING`,
         [item.name, item.category, item.description, item.status]
       );
       console.log(`  ✅  ${item.name}  [${item.category}]`);

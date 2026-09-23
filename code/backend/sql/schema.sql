@@ -18,7 +18,7 @@ CREATE TABLE users (
 -- 2. Inventory / Items Table
 CREATE TABLE inventory (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
+    name VARCHAR(100) NOT NULL UNIQUE,
     category VARCHAR(50),
     description TEXT,
     spec VARCHAR(150),
