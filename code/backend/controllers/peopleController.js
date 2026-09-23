@@ -15,6 +15,9 @@ const getAllPeople = async (req, res) => {
 const createPerson = async (req, res) => {
     try {
         const { name, title, dept, research, type, sort_order } = req.body;
+        if (!name || !type) {
+            return res.status(400).json({ message: "Name and type are required" });
+        }
         const result = await pool.query(
             "INSERT INTO people (name, title, dept, research, type, sort_order) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
             [name, title, dept, research, type, sort_order || 0]

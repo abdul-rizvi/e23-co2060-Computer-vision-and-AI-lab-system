@@ -1,5 +1,4 @@
 const pool = require("../config/db"); //connecting to the database
-const xlsx = require('xlsx');
 
 //get all items
 const getAllItems = async (req, res) => {

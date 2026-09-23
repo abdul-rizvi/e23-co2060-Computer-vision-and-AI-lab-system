@@ -21,7 +21,7 @@ transporter.verify((error, success) => {
 });
 
 // Portal URL from environment or default
-const portalUrl = process.env.PORTAL_URL || "http://localhost:5173";
+const portalUrl = process.env.PORTAL_URL || "http://localhost:5174";
 
 // ── Send Registration Confirmation Email ─────────────
 const sendRegistrationEmail = async (email, name, role) => {

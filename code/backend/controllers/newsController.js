@@ -15,6 +15,9 @@ const getAllNews = async (req, res) => {
 const createNews = async (req, res) => {
     try {
         const { category, title, content, published_date } = req.body;
+        if (!title) {
+            return res.status(400).json({ message: "Title is required" });
+        }
         const result = await pool.query(
             "INSERT INTO news (category, title, content, published_date) VALUES ($1, $2, $3, $4) RETURNING *",
             [category, title, content, published_date || null]
