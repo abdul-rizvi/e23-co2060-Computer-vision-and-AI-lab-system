@@ -373,15 +373,18 @@ export const PORTAL_MENUS = {
     { id: "announcements", iconKey: "news", label: "Announcements" },
   ],
   officer: [
+    { id: "overview", iconKey: "overview", label: "Overview" },
     { id: "booking-requests", iconKey: "booking-requests", label: "Booking Requests" },
     { id: "equipment", iconKey: "equipment", label: "Equipment" },
   ],
   staff: [
-    { id: "dashboard", iconKey: "about", label: "Dashboard" },
-    { id: "consults", iconKey: "consultation", label: "Consultations" },
-    { id: "reservations", iconKey: "calendar", label: "Reservations" },
+    { id: "dashboard", iconKey: "overview", label: "My Bookings" },
+    { id: "equipment", iconKey: "equipment", label: "Equipment" },
+    { id: "booking", iconKey: "booking", label: "Book Resource" },
+    { id: "announcements", iconKey: "news", label: "Announcements" },
   ],
   admin: [
+    { id: "projects", iconKey: "projects", label: "Projects" },
     { id: "overview", iconKey: "overview", label: "Overview" },
     { id: "reservations", iconKey: "reservations", label: "Reservations" },
     { id: "equipment", iconKey: "equipment", label: "Equipment" },

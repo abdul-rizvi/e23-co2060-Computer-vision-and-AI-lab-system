@@ -1,8 +1,10 @@
+import { useId } from "react";
 import { createPortal } from "react-dom";
 import { T } from "../styles/theme";
 import { renderIcon } from "./iconUtils";
 
 const STATUS_TONES = {
+  Rescheduled: { bg: `${T.info}12`, color: T.info, border: `${T.info}26` },
   Approved: { bg: `${T.success}12`, color: T.success, border: `${T.success}26` },
   Pending: { bg: `${T.warning}12`, color: T.warning, border: `${T.warning}26` },
   Rejected: { bg: `${T.danger}12`, color: T.danger, border: `${T.danger}26` },
@@ -61,12 +63,14 @@ export function Modal({ title, subtitle, onClose, children, maxWidth = 720, acti
 }
 
 export function Field({ label, type = "text", value, onChange, onKeyDown, options, rows, placeholder, icon: Icon, error, helperText, id, ...props }) {
-  const control = { value: value ?? "", onChange: onChange || (() => {}), onKeyDown, placeholder, id, ...props };
+  const generatedId = useId();
+  const controlId = id ?? generatedId;
+  const control = { value: value ?? "", onChange: onChange || (() => {}), onKeyDown, placeholder, id: controlId, ...props };
   const controlClass = ["field-control", rows ? "field-control--textarea" : "", options ? "field-control--select" : "", Icon ? "has-icon" : ""].filter(Boolean).join(" ");
 
   return (
     <div className="field">
-      {label && <label className="field-label" htmlFor={id}>{label}</label>}
+      {label && <label className="field-label" htmlFor={controlId}>{label}</label>}
       {options ? (
         <div className="field-wrap">
           {Icon && <span className="field-icon">{renderIcon(Icon, { size: 16, strokeWidth: 2 })}</span>}
