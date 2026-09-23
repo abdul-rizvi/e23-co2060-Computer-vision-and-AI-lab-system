@@ -83,6 +83,12 @@ web_modules/
 .env.production.local
 .env.local
 
+# Debug / test helper scripts (local-only)
+get_otp.js
+test_api.js
+setup_otp_table.js
+setup_password_reset_table.js
+
 # parcel-bundler cache (https://parceljs.org/)
 .cache
 .parcel-cache
