@@ -186,7 +186,7 @@ function EquipmentList() {
 
   return (
     <div className="fade-up">
-      <h2 style={{ margin: 0, fontSize: "1.35rem", color: T.navyDark, marginBottom: ".35rem" }}>Equipments & Availability</h2>
+      <h2 style={{ margin: 0, fontSize: "1.35rem", color: T.navyDark, marginBottom: ".35rem" }}>Equipment & Availability</h2>
       <p style={{ color: T.textLight, fontSize: ".9rem", marginBottom: "1.2rem" }}>Browse available lab equipment and their intended use cases.</p>
       
       {isLoading ? (

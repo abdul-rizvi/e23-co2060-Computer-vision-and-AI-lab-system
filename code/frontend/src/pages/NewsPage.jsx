@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { T } from "../styles/theme";
 import { Badge, Card, Divider, SectionLabel, SectionTitle } from "../components/UI";
 import { NEWS_ITEMS } from "../data/labData";
@@ -38,15 +38,13 @@ export function NewsPage() {
     return () => { cancelled = true; };
   }, []);
 
-  const shown = useMemo(() => news, [news]);
-
   return (
     <div className="page-shell section-padding">
       <SectionLabel text="News" />
       <SectionTitle>Latest updates and events</SectionTitle>
       <Divider />
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1rem" }}>
-        {shown.map((item) => (
+        {news.map((item) => (
           <Card key={item.title} style={{ padding: "1.2rem", borderTop: `3px solid ${T.gold}` }}>
             <div style={{ display: "flex", alignItems: "center", gap: ".6rem", marginBottom: ".7rem", flexWrap: "wrap" }}>
               <Badge label={item.category} tone="Pending" />

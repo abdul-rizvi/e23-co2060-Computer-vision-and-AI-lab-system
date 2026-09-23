@@ -76,7 +76,7 @@ function PublicPage({ section, setSection, setShowBooking, setShowLogin }) {
     case "projects":     return <ProjectsPage />;
     case "publications": return <PublicationsPage />;
     case "people":       return <PeoplePage />;
-    case "facilities":   return <FacilitiesPage  setShowBooking={setShowBooking} />;
+    case "facilities":   return <FacilitiesPage />;
     case "news":         return <NewsPage />;
     case "services":     return <ServicesPage    setShowBooking={setShowBooking} />;
     case "contact":      return <ContactPage />;
