@@ -38,8 +38,8 @@ const deleteItem=async(req,res)=>{
             return res.status(404).json({ message: "Item not found"});
         }
         res.status(200).json({
-            message: "Item deleted succesfully",
-            deletItem: result.rows[0]
+            message: "Item deleted successfully",
+            deletedItem: result.rows[0]
         });
     } catch (error) {
         console.error(error);
