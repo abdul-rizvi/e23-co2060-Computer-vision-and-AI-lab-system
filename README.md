@@ -65,7 +65,6 @@ The system serves two distinct purposes:
 | Component | Technology | Purpose |
 |:---|:---|:---|
 | **Frontend** | React 19 + Vite | Interactive SPA for all portals and public pages |
-| **Routing** | React Router DOM v7 | Client-side navigation between sections |
 | **Backend** | Node.js + Express v5 | REST API server, authentication, business logic |
 | **Database** | PostgreSQL (via `pg`) | Relational storage for users, bookings, inventory |
 | **Auth** | JWT + Google OAuth (`@react-oauth/google`) | Secure session management and single sign-on |
@@ -73,7 +72,7 @@ The system serves two distinct purposes:
 | **Styling** | Vanilla CSS + CSS Variables | Theming and component-level styles |
 | **Icons** | React Icons | UI icon library |
 | **HTTP Client** | Axios | Frontend-to-backend API communication |
-| **File Handling** | XLSX | Spreadsheet export for data and reports |
+| **File Handling** | XLSX | Spreadsheet import for bulk inventory seeding |
 
 ---
 
@@ -119,40 +118,63 @@ The system follows a decoupled **client-server architecture**:
 e23-co2060-Computer-vision-and-AI-lab-system/
 ├── code/
 │   ├── backend/
-│   │   ├── config/           # Database connection (pg pool)
-│   │   ├── controllers/      # Route handler logic
-│   │   ├── middleware/       # JWT authentication middleware
-│   │   ├── routes/           # Express route definitions
+│   │   ├── config/
+│   │   │   └── db.js              # PostgreSQL pool (pg) connection
+│   │   ├── controllers/
+│   │   │   ├── analyticsController.js
+│   │   │   ├── authController.js
+│   │   │   ├── bookingController.js
+│   │   │   ├── inventoryController.js
+│   │   │   ├── newsController.js
+│   │   │   ├── peopleController.js
+│   │   │   └── usersController.js
+│   │   ├── middleware/
+│   │   │   └── authMiddleware.js   # JWT verification middleware
+│   │   ├── routes/
+│   │   │   ├── analyticsRoutes.js
 │   │   │   ├── authRoutes.js
 │   │   │   ├── bookingRoutes.js
 │   │   │   ├── inventoryRoutes.js
-│   │   │   ├── usersRoutes.js
-│   │   │   ├── peopleRoutes.js
 │   │   │   ├── newsRoutes.js
-│   │   │   └── analyticsRoutes.js
-│   │   ├── services/         # Business logic & email service
-│   │   ├── sql/              # SQL schema files
-│   │   ├── seedEquipment.js  # Seed script for equipment data
-│   │   ├── seedInventory.js  # Seed script for inventory items
-│   │   ├── seedUsers.js      # Seed script for initial users
-│   │   └── index.js          # Express app entry point (port 5000)
+│   │   │   ├── peopleRoutes.js
+│   │   │   └── usersRoutes.js
+│   │   ├── services/
+│   │   │   └── emailService.js     # OTP & notification email service
+│   │   ├── sql/
+│   │   │   └── schema.sql          # Full database schema
+│   │   ├── runSchema.js            # Runs schema.sql against the database
+│   │   ├── seedEquipment.js        # Seeds 49 real equipment items
+│   │   ├── seedInventory.js        # Imports items from CSV/Excel file
+│   │   ├── seedUsers.js            # Seeds initial user accounts
+│   │   └── index.js                # Express app entry point (port 5000)
 │   │
 │   └── frontend/
 │       ├── src/
-│       │   ├── components/   # Shared UI components (Layout, Modals)
-│       │   ├── pages/        # Public portal pages
-│       │   ├── portal/       # Role-based internal portal views
+│       │   ├── assets/             # Static images (lab logo)
+│       │   ├── components/
+│       │   │   ├── iconUtils.js    # Icon render helper
+│       │   │   ├── Layout.jsx      # TopBar, LogoBar, MainNav, Footer
+│       │   │   ├── Modals.jsx      # Login, Register, Forgot Password modals
+│       │   │   └── UI.jsx          # Shared UI primitives (Button, Card, etc.)
+│       │   ├── data/
+│       │   │   └── labData.js      # Static data & portal menu definitions
+│       │   ├── pages/              # Public portal page components
+│       │   ├── portal/
 │       │   │   ├── AdminPortal.jsx
 │       │   │   ├── OfficerPortal.jsx
+│       │   │   ├── PortalLayout.jsx
 │       │   │   ├── StaffPortal.jsx
-│       │   │   ├── StudentPortal.jsx
-│       │   │   └── PortalLayout.jsx
-│       │   ├── services/     # Axios API service wrappers
-│       │   ├── styles/       # CSS theme & global styles
-│       │   └── App.jsx       # Root component & section router
+│       │   │   └── StudentPortal.jsx
+│       │   ├── services/
+│       │   │   └── api.js          # Axios API service wrappers
+│       │   ├── styles/
+│       │   │   ├── index.css       # Global CSS & component styles
+│       │   │   └── theme.js        # Design tokens & color palette
+│       │   ├── App.jsx             # Root component & state-based section router
+│       │   └── main.jsx            # React DOM entry point
 │       └── index.html
 │
-└── docs/                     # GitHub Pages documentation site
+└── docs/                           # GitHub Pages documentation site
 ```
 
 ---
@@ -184,10 +206,10 @@ The database is hosted on **[Neon](https://neon.tech)** (serverless PostgreSQL).
 
 ```bash
 cd code/backend
-node runSchema.js
-node seedUsers.js
-node seedInventory.js
-node seedEquipment.js
+node runSchema.js          # Creates all tables
+node seedUsers.js          # Seeds initial user accounts
+node seedEquipment.js      # Seeds 49 built-in equipment items
+# node seedInventory.js path/to/file.csv  # (Optional) Import from CSV/Excel
 ```
 
 ### 3. Configure the Backend
@@ -265,19 +287,64 @@ Web app will be available at **http://localhost:5174**
 
 ## 📡 API Reference
 
+### Authentication
+
 | Method | Endpoint | Description |
 |:---|:---|:---|
+| `POST` | `/api/auth/register/initiate` | Start registration — sends OTP email |
+| `POST` | `/api/auth/register/verify` | Verify OTP and create account |
 | `POST` | `/api/auth/login` | User login — returns JWT token |
-| `POST` | `/api/auth/register` | New user registration with OTP |
+| `POST` | `/api/auth/google` | Google OAuth login |
+| `POST` | `/api/auth/forgot-password/initiate` | Start password reset — sends OTP |
+| `POST` | `/api/auth/forgot-password/reset` | Verify OTP and set new password |
+
+### Inventory
+
+| Method | Endpoint | Description |
+|:---|:---|:---|
 | `GET` | `/api/items` | List all inventory/equipment items |
 | `POST` | `/api/items` | Add new inventory item (admin) |
+| `PUT` | `/api/items/:id` | Update an inventory item |
+| `DELETE` | `/api/items/:id` | Delete an inventory item |
+
+### Bookings
+
+| Method | Endpoint | Description |
+|:---|:---|:---|
 | `GET` | `/api/bookings` | View bookings (filtered by role) |
 | `POST` | `/api/bookings` | Create a new booking request |
-| `GET` | `/api/users` | User management (admin only) |
+| `PUT` | `/api/bookings/:id/status` | Approve or reject a booking |
+
+### Users
+
+| Method | Endpoint | Description |
+|:---|:---|:---|
+| `GET` | `/api/users` | List all users (admin only) |
+| `PUT` | `/api/users/:id` | Update user details |
+| `DELETE` | `/api/users/:id` | Delete a user |
+
+### People (Lab Profiles)
+
+| Method | Endpoint | Description |
+|:---|:---|:---|
 | `GET` | `/api/people` | Retrieve lab people/profiles |
-| `POST` | `/api/people` | Add/update a person profile |
+| `POST` | `/api/people` | Add a person profile |
+| `PUT` | `/api/people/:id` | Update a person profile |
+| `DELETE` | `/api/people/:id` | Delete a person profile |
+
+### News
+
+| Method | Endpoint | Description |
+|:---|:---|:---|
 | `GET` | `/api/news` | Retrieve news and events |
 | `POST` | `/api/news` | Publish a news item (admin) |
+| `PUT` | `/api/news/:id` | Update a news item |
+| `DELETE` | `/api/news/:id` | Delete a news item |
+
+### Analytics
+
+| Method | Endpoint | Description |
+|:---|:---|:---|
 | `GET` | `/api/analytics` | Usage and booking analytics (admin) |
 
 ---

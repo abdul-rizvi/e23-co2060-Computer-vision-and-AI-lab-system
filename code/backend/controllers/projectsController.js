@@ -1,0 +1,76 @@
+const pool = require("../config/db");
+
+const getAllProjects = async (req, res) => {
+    try {
+        const result = await pool.query(
+            "SELECT * FROM projects ORDER BY id DESC"
+        );
+        res.json(result.rows);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Error fetching projects" });
+    }
+};
+
+const createProject = async (req, res) => {
+    try {
+        const { title, description, lead, supervisor, team_members, tags, year, status, github_link, demo_link, image_url, video_url } = req.body;
+        if (!title) {
+            return res.status(400).json({ message: "Title is required" });
+        }
+        const result = await pool.query(
+            "INSERT INTO projects (title, description, lead, supervisor, team_members, tags, year, status, github_link, demo_link, image_url, video_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *",
+            [title, description, lead, supervisor, team_members, tags, year, status, github_link, demo_link, image_url, video_url]
+        );
+        res.status(201).json(result.rows[0]);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Error creating project" });
+    }
+};
+
+const updateProject = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { title, description, lead, supervisor, team_members, tags, year, status, github_link, demo_link, image_url, video_url } = req.body;
+        const result = await pool.query(
+            "UPDATE projects SET title = $1, description = $2, lead = $3, supervisor = $4, team_members = $5, tags = $6, year = $7, status = $8, github_link = $9, demo_link = $10, image_url = $11, video_url = $12 WHERE id = $13 RETURNING *",
+            [title, description, lead, supervisor, team_members, tags, year, status, github_link, demo_link, image_url, video_url, id]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: "Project not found" });
+        }
+
+        res.json(result.rows[0]);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Error updating project" });
+    }
+};
+
+const deleteProject = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const result = await pool.query(
+            "DELETE FROM projects WHERE id = $1 RETURNING *",
+            [id]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: "Project not found" });
+        }
+
+        res.json({ message: "Project deleted successfully" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Error deleting project" });
+    }
+};
+
+module.exports = {
+    getAllProjects,
+    createProject,
+    updateProject,
+    deleteProject
+};

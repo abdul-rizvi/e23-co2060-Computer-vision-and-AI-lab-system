@@ -1,4 +1,4 @@
-import { LuBuilding2, LuMail, LuPhone, LuLockKeyhole, LuArrowRight, LuHouse, LuMapPin, LuBookOpen, LuFlaskConical, LuUsers, LuCalendarClock, LuFileText, LuInfo, LuWrench, LuGraduationCap } from "react-icons/lu";
+import { LuBuilding2, LuMail, LuPhone, LuLockKeyhole, LuArrowRight, LuHouse, LuMapPin, LuBookOpen, LuFlaskConical, LuUsers, LuCalendarClock, LuFileText, LuInfo, LuWrench, LuGraduationCap, LuLibrary } from "react-icons/lu";
 import { T } from "../styles/theme";
 import labLogo from "../assets/lab-logo.png";
 import { Button } from "./UI";
@@ -13,6 +13,7 @@ const NAV_ITEMS = [
   { id: "people", label: "People", icon: LuUsers },
   { id: "facilities", label: "Facilities", icon: LuWrench },
   { id: "news", label: "News", icon: LuCalendarClock },
+  { id: "documentation", label: "Docs", icon: LuLibrary },
   { id: "services", label: "Services", icon: LuGraduationCap },
   { id: "contact", label: "Contact", icon: LuMail },
 ];
@@ -89,6 +90,7 @@ export function Breadcrumb({ section }) {
     people: "People",
     facilities: "Facilities",
     news: "News",
+    documentation: "Documentation",
     services: "Services",
     contact: "Contact",
   };

@@ -10,6 +10,15 @@ API.interceptors.request.use((req) => {
   return req;
 });
 
+API.interceptors.response.use(response => response, error => {
+  if (error.response?.status === 401 && localStorage.getItem("token")) {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    window.dispatchEvent(new Event("session-expired"));
+  }
+  return Promise.reject(error);
+});
+
 export const initiateRegistration = (data) => API.post("/api/auth/register/initiate", data);
 export const verifyRegistration = (data) => API.post("/api/auth/register/verify", data);
 export const googleLoginUser = (data) => API.post("/api/auth/google", data);
@@ -23,6 +32,7 @@ export const deleteItem = (id) => API.delete(`/api/items/${id}`);
 export const updateItem = (id, data) => API.put(`/api/items/${id}`, data);
 
 export const createBooking = (data) => API.post("/api/bookings", data);
+export const getMyBookings = () => API.get("/api/bookings", { params: { mine: true } });
 export const getBookings = () => API.get("/api/bookings");
 export const updateBookingStatus = (id, data) => API.put(`/api/bookings/${id}/status`, data);
 
@@ -40,5 +50,10 @@ export const getNews = () => API.get("/api/news");
 export const createNews = (data) => API.post("/api/news", data);
 export const updateNews = (id, data) => API.put(`/api/news/${id}`, data);
 export const deleteNews = (id) => API.delete(`/api/news/${id}`);
+
+export const getProjects = () => API.get("/api/projects");
+export const createProject = (data) => API.post("/api/projects", data);
+export const updateProject = (id, data) => API.put(`/api/projects/${id}`, data);
+export const deleteProject = (id) => API.delete(`/api/projects/${id}`);
 
 export default API;

@@ -1,7 +1,8 @@
+import { Statistics } from "./Statistics";
 import { useEffect, useState } from "react";
 import {
   LuCheck, LuPencil, LuPlus, LuRefreshCcw, LuTrash2,
-  LuWrench, LuCalendarClock, LuX, LuShieldCheck
+  LuWrench, LuCalendarClock, LuX, LuShieldCheck, LuCalendarDays
 } from "react-icons/lu";
 import { T } from "../styles/theme";
 import { Badge, Button, Card, Field, Modal, PStat, PTable, Divider, SectionLabel, SectionTitle } from "../components/UI";
@@ -68,12 +69,72 @@ function ConfirmModal({ title, message, confirmLabel = "Delete", onConfirm, onCa
   );
 }
 
+function RescheduleModal({ open, booking, onClose, onSaved }) {
+  const [form, setForm] = useState({ booking_date: "", time_slot: "", admin_notes: "" });
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (open && booking) {
+      setForm({
+        booking_date: booking.booking_date ? String(booking.booking_date).slice(0, 10) : "",
+        time_slot: booking.time_slot || "",
+        admin_notes: booking.admin_notes || ""
+      });
+      setSaving(false);
+      setError("");
+    }
+  }, [open, booking]);
+
+  if (!open || !booking) return null;
+
+  const set = (key) => (e) => setForm((prev) => ({ ...prev, [key]: e.target.value }));
+
+  const submit = async () => {
+    if (!form.booking_date || !form.time_slot) {
+      setError("Please provide a new date and time slot.");
+      return;
+    }
+    setSaving(true);
+    setError("");
+    try {
+      await updateBookingStatus(booking.id, {
+        status: "Rescheduled",
+        booking_date: form.booking_date,
+        time_slot: form.time_slot,
+        admin_notes: form.admin_notes
+      });
+      onSaved();
+      onClose();
+    } catch (err) {
+      console.error("Failed to reschedule", err);
+      setError(err.response?.data?.message || "Failed to reschedule booking.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Modal title="Reschedule Reservation" subtitle={`Update date and time for reservation #${booking.id}`} onClose={onClose} maxWidth={500}>
+      {error && <div style={{ marginBottom: "1rem", padding: ".85rem .95rem", borderRadius: 14, background: `${T.danger}10`, border: `1px solid ${T.danger}26`, color: T.danger, fontSize: ".84rem" }}>{error}</div>}
+      <Field label="New Date" type="date" value={form.booking_date} onChange={set("booking_date")} />
+      <Field label="New Time Slot" value={form.time_slot} onChange={set("time_slot")} options={["08:00–10:00", "10:00–12:00", "13:00–15:00", "15:00–17:00"]} />
+      <Field label="Admin Notes / Reason" value={form.admin_notes} onChange={set("admin_notes")} rows={3} placeholder="Provide a reason for rescheduling..." />
+      <div style={{ display: "flex", gap: ".75rem", justifyContent: "flex-end" }}>
+        <Button variant="outline" onClick={onClose} disabled={saving}>Cancel</Button>
+        <Button variant="primary" icon={LuCalendarDays} onClick={submit} disabled={saving}>{saving ? "Saving…" : "Reschedule"}</Button>
+      </div>
+    </Modal>
+  );
+}
+
 // ─── Booking Requests Section ───────────────────────────────────
 function BookingRequestsSection() {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionId, setActionId] = useState(null);
   const [error, setError] = useState("");
+  const [rescheduleTarget, setRescheduleTarget] = useState(null);
 
   const load = async () => {
     setLoading(true);
@@ -110,17 +171,20 @@ function BookingRequestsSection() {
   const tableRows = rows.map((booking) => [
     `#${booking.id}`,
     booking.user_name || "Student",
+    booking.user_email || "—",
+    booking.purpose || "—",
     booking.resource,
     fmtDate(booking.booking_date || booking.date),
     booking.time_slot || booking.time || "—",
     <Badge
       key={`status-${booking.id}`}
       label={booking.status || "Pending"}
-      tone={isPending(booking.status) ? "Pending" : String(booking.status).toLowerCase() === "approved" ? "Active" : "Rejected"}
+      tone={isPending(booking.status) ? "Pending" : String(booking.status).toLowerCase() === "approved" ? "Active" : booking.status === "Rescheduled" ? "Rescheduled" : "Rejected"}
     />,
-    isPending(booking.status) ? (
+    ["pending", "rescheduled", "approved"].includes(String(booking.status).toLowerCase()) ? (
       <div key={`act-${booking.id}`} style={{ display: "flex", gap: ".45rem", flexWrap: "wrap" }}>
         <Button variant="primary" size="sm" icon={LuCheck} onClick={() => handleAction(booking.id, "Approved")} disabled={actionId === booking.id}>Approve</Button>
+        <Button variant="outline" size="sm" icon={LuCalendarDays} onClick={() => setRescheduleTarget(booking)} disabled={actionId === booking.id}>Reschedule</Button>
         <Button variant="danger" size="sm" icon={LuX} onClick={() => handleAction(booking.id, "Rejected")} disabled={actionId === booking.id}>Reject</Button>
       </div>
     ) : (
@@ -146,8 +210,9 @@ function BookingRequestsSection() {
       ) : rows.length === 0 ? (
         <EmptyState title="No booking requests" desc="No students have submitted booking requests yet." />
       ) : (
-        <PTable cols={["ID", "Student", "Resource", "Date", "Time", "Status", "Actions"]} rows={tableRows} />
+        <PTable cols={["ID", "Student", "Email", "Purpose", "Resource", "Date", "Time", "Status", "Actions"]} rows={tableRows} />
       )}
+      <RescheduleModal open={!!rescheduleTarget} booking={rescheduleTarget} onClose={() => setRescheduleTarget(null)} onSaved={load} />
     </SectionFrame>
   );
 }
@@ -155,7 +220,7 @@ function BookingRequestsSection() {
 // ─── Equipment Management Section ──────────────────────────────
 function EquipmentModal({ open, initial, onClose, onSaved }) {
   const isEdit = Boolean(initial?.id);
-  const [form, setForm] = useState({ name: "", category: "", description: "", spec: "", fee: "", status: "available" });
+  const [form, setForm] = useState({ name: "", category: "", description: "", spec: "", fee: "", status: "available", image_url: "" });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -168,6 +233,7 @@ function EquipmentModal({ open, initial, onClose, onSaved }) {
         spec: initial?.spec || "",
         fee: initial?.fee || "",
         status: initial?.status || "available",
+        image_url: initial?.image_url || ""
       });
       setError("");
       setSaving(false);
@@ -210,6 +276,7 @@ function EquipmentModal({ open, initial, onClose, onSaved }) {
         <Field label="Spec" value={form.spec} onChange={set("spec")} />
         <Field label="Fee" value={form.fee} onChange={set("fee")} />
       </div>
+      <Field label="Image URL" value={form.image_url} onChange={set("image_url")} placeholder="Optional media URL..." />
       <Field label="Status" value={form.status} onChange={set("status")} options={[
         { value: "available", label: "Available" },
         { value: "in-use", label: "In use" },
@@ -333,6 +400,7 @@ function EquipmentSection() {
 
 // ─── Export ─────────────────────────────────────────────────────
 export function OfficerPortal({ active }) {
+  if (active === "overview") return <Statistics />;
   if (active === "equipment") return <EquipmentSection />;
   return <BookingRequestsSection />;  // default to booking-requests
 }

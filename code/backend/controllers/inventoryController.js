@@ -1,5 +1,4 @@
 const pool = require("../config/db"); //connecting to the database
-const xlsx = require('xlsx');
 
 //get all items
 const getAllItems = async (req, res) => {
@@ -15,13 +14,13 @@ const getAllItems = async (req, res) => {
 //Post new items
 const createItem=async(req,res)=>{
     try {
-        const { name, category, description, status, spec, fee } = req.body;
+        const { name, category, description, status, spec, fee, image_url } = req.body;
         if (!name || !category) {
             return res.status(400).json({ message: "Name and category are required" });
         }
         const result = await pool.query(
-            "INSERT INTO inventory (name, category, description, spec, fee, status) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
-            [name, category, description, spec, fee, status || 'available']
+            "INSERT INTO inventory (name, category, description, spec, fee, status, image_url) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *",
+            [name, category, description, spec, fee, status || 'available', image_url || null]
         );
         res.status(201).json(result.rows[0]);
     } catch (error) {
@@ -51,10 +50,10 @@ const deleteItem=async(req,res)=>{
 const updateItem = async (req, res) => {
     try {
         const { id } = req.params;
-        const { name, category, description, status, spec, fee } = req.body;
+        const { name, category, description, status, spec, fee, image_url } = req.body;
         const result = await pool.query(
-            "UPDATE inventory SET name = $1, category = $2, description = $3, status = $4, spec = $5, fee = $6 WHERE id = $7 RETURNING *",
-            [name, category, description, status, spec, fee, id]
+            "UPDATE inventory SET name = $1, category = $2, description = $3, status = $4, spec = $5, fee = $6, image_url = $7 WHERE id = $8 RETURNING *",
+            [name, category, description, status, spec, fee, image_url || null, id]
         );
         if (result.rows.length === 0) {
             return res.status(404).json({ message: "Item not found" });

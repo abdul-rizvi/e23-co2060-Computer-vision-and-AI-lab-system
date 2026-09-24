@@ -13,7 +13,7 @@ export function BookingModal({ onClose }) {
 
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
   const canProceed1 = form.type && form.resource;
-  const canProceed2 = form.date && form.time;
+  const canProceed2 = form.date && form.time && form.purpose.trim();
 
   const handleSubmitBooking = async () => {
     try {
@@ -29,7 +29,7 @@ export function BookingModal({ onClose }) {
       onClose();
     } catch (error) {
       console.error("Booking error:", error);
-      alert("Failed to submit the booking request. Please check the console.");
+      alert(error.response?.data?.message || "Failed to submit the booking request.");
     } finally {
       setIsSubmitting(false);
     }

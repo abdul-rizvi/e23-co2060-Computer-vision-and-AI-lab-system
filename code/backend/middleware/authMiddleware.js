@@ -1,11 +1,12 @@
 const jwt = require("jsonwebtoken");
+const pool = require("../config/db");
 
 // Verify token — runs before the actual route handler
-const verifyToken = (req, res, next) => {
+const verifyToken = async (req, res, next) => {
     const authHeader = req.headers["authorization"];
 
     // Token comes as: "Bearer <token>"
-    const token = authHeader && authHeader.split(" ")[1];
+    const token = typeof authHeader === "string" && /^Bearer \S+$/i.test(authHeader) ? authHeader.split(" ")[1] : null;
 
     if (!token) {
         return res.status(401).json({ message: "Access denied. No token provided." });
@@ -14,10 +15,15 @@ const verifyToken = (req, res, next) => {
     try {
         // Verify and decode the token
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        req.user = decoded;  // attach user info to the request
+        const result = await pool.query("SELECT id, email, role FROM users WHERE id = $1", [decoded.id]);
+        if (!result.rows.length) return res.status(401).json({ message: "Account no longer exists" });
+        req.user = result.rows[0];
         next();              // pass control to the actual route handler
     } catch (error) {
-        return res.status(403).json({ message: "Invalid or expired token" });
+        if (["JsonWebTokenError", "TokenExpiredError", "NotBeforeError"].includes(error.name)) {
+            return res.status(401).json({ message: "Invalid or expired token" });
+        }
+        return res.status(503).json({ message: "Authentication is temporarily unavailable" });
     }
 };
 

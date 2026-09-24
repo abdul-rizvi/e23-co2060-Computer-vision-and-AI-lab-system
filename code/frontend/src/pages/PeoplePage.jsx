@@ -30,7 +30,7 @@ export function PeoplePage() {
       try {
         const response = await getPeople();
         const rows = normalizePeople(response.data);
-        if (!cancelled && rows.length > 0) setPeople(rows);
+        if (!cancelled) setPeople(rows);
       } catch (error) {
         console.error("Failed to fetch people", error);
       }
@@ -58,6 +58,7 @@ export function PeoplePage() {
         </div>
       </div>
 
+      {shown.length === 0 && <p style={{ color: T.textMid }}>No people found.</p>}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "1rem" }}>
         {shown.map((person) => (
           <Card key={`${person.name}-${person.title}`} style={{ padding: "1.2rem", textAlign: "center" }}>

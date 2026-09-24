@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { LuArrowRight, LuCalendarClock, LuFlaskConical, LuUsers, LuWrench, LuBellRing, LuChevronRight } from "react-icons/lu";
 import { T } from "../styles/theme";
 import { Badge, Button, Card, Divider, SectionLabel, SectionTitle } from "../components/UI";
@@ -79,7 +79,7 @@ function HeroSlider({ setSection, setShowLogin }) {
   );
 }
 
-function QuickLinks({ setShowBooking, setShowLogin }) {
+function QuickLinks({ setShowLogin }) {
   const links = [
     { title: "Student portal", desc: "Bookings, history, and QR passes.", action: () => setShowLogin(true), icon: ICONS.studentPortal },
     { title: "Staff portal", desc: "Consultations, projects, and approvals.", action: () => setShowLogin(true), icon: ICONS.staffPortal },
@@ -193,7 +193,7 @@ function ResearchSection({ setSection }) {
   );
 }
 
-function ServicesBand({ setShowBooking }) {
+function ServicesBand({ setShowLogin }) {
   return (
     <div style={{ background: `linear-gradient(135deg, ${T.navyDark}, ${T.navy})`, color: "white", padding: "3rem 0" }}>
       <div className="page-shell">
@@ -212,7 +212,7 @@ function ServicesBand({ setShowBooking }) {
                 </div>
                 <div style={{ fontWeight: 700, color: T.gold, marginBottom: ".35rem" }}>{service.title}</div>
                 <p style={{ margin: 0, color: "rgba(255,255,255,.72)", lineHeight: 1.65, fontSize: ".87rem" }}>{service.desc}</p>
-                <div style={{ marginTop: "1rem" }}><Button variant="gold" size="sm" onClick={() => setShowBooking(true)}>Request access</Button></div>
+                <div style={{ marginTop: "1rem" }}><Button variant="gold" size="sm" onClick={() => setShowLogin(true)}>Request access</Button></div>
               </Card>
             );
           })}
@@ -295,7 +295,8 @@ function NewsSection({ setSection, news }) {
 }
 
 function NewsTicker({ news }) {
-  const items = (news.length ? news : NEWS_ITEMS).map((item) => item.title || item.desc || "Latest update");
+  const items = news.map((item) => item.title || item.desc || "Latest update");
+  if (items.length === 0) return null;
   const tickerItems = [...items, ...items];
   return (
     <div style={{ background: T.navyDark, color: "white", borderTop: `1px solid rgba(255,255,255,.08)`, overflow: "hidden" }}>
@@ -311,7 +312,7 @@ function NewsTicker({ news }) {
   );
 }
 
-export function HomePage({ setSection, setShowBooking, setShowLogin }) {
+export function HomePage({ setSection, setShowLogin }) {
   const [news, setNews] = useState(NEWS_ITEMS);
 
   useEffect(() => {
@@ -320,7 +321,7 @@ export function HomePage({ setSection, setShowBooking, setShowLogin }) {
       try {
         const response = await getNews();
         const rows = normalizeNews(response.data);
-        if (!cancelled && rows.length > 0) setNews(rows);
+        if (!cancelled) setNews(rows);
       } catch (error) {
         console.error("Failed to load news", error);
       }
@@ -329,8 +330,6 @@ export function HomePage({ setSection, setShowBooking, setShowLogin }) {
     return () => { cancelled = true; };
   }, []);
 
-  const tickerSource = useMemo(() => news.length ? news : NEWS_ITEMS, [news]);
-
   return (
     <>
       <div className="section-padding">
@@ -338,7 +337,7 @@ export function HomePage({ setSection, setShowBooking, setShowLogin }) {
           <HeroSlider setSection={setSection} setShowLogin={setShowLogin} />
         </div>
       </div>
-      <QuickLinks setShowBooking={setShowBooking} setShowLogin={setShowLogin} />
+      <QuickLinks setShowLogin={setShowLogin} />
       <AboutSection setSection={setSection} />
       <ResearchSection setSection={setSection} />
       <div className="section-padding">
@@ -347,9 +346,9 @@ export function HomePage({ setSection, setShowBooking, setShowLogin }) {
           <PublicationsColumn setSection={setSection} />
         </div>
       </div>
-      <ServicesBand setShowBooking={setShowBooking} />
-      <NewsSection setSection={setSection} news={tickerSource} />
-      <NewsTicker news={tickerSource} />
+      <ServicesBand setShowLogin={setShowLogin} />
+      <NewsSection setSection={setSection} news={news} />
+      <NewsTicker news={news} />
     </>
   );
 }

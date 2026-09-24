@@ -1,3 +1,4 @@
+const { randomInt, randomBytes } = require("node:crypto");
 const pool = require("../config/db");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -21,13 +22,13 @@ const initiateRegistration = async (req, res) => {
         }
 
         // Check if user already exists in main users table
-        const existing = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
+        const existing = await pool.query("SELECT * FROM users WHERE LOWER(email) = $1", [email]);
         if (existing.rows.length > 0) {
             return res.status(409).json({ message: "Email already registered" });
         }
 
         // Generate 6-digit OTP
-        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        const otp = randomInt(100000, 1000000).toString();
         
         // Hash the password now so we don't store plaintext password anywhere
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -120,7 +121,7 @@ const login = async (req, res) => {
 
         // Find user
         const result = await pool.query(
-            "SELECT * FROM users WHERE email = $1", [email]
+            "SELECT * FROM users WHERE LOWER(email) = $1", [email]
         );
         if (result.rows.length === 0) {
             return res.status(401).json({ message: "Invalid credentials" });
@@ -175,13 +176,13 @@ const googleLogin = async (req, res) => {
         }
 
         // Check if user exists
-        let userResult = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
+        let userResult = await pool.query("SELECT * FROM users WHERE LOWER(email) = $1", [email]);
         let user;
 
         if (userResult.rows.length === 0) {
             // Register new user instantly
             const assignedRole = "student";
-            const randomPassword = await bcrypt.hash(Math.random().toString(36).slice(-8), 10);
+            const randomPassword = await bcrypt.hash(randomBytes(32).toString("hex"), 10);
             
             const insertResult = await pool.query(
                 "INSERT INTO users (name, email, password, role) VALUES ($1, $2, $3, $4) RETURNING id, name, email, role",
@@ -226,7 +227,7 @@ const forgotPasswordInitiate = async (req, res) => {
         }
 
         // Check if a user with this email actually exists
-        const existing = await pool.query("SELECT id FROM users WHERE email = $1", [email]);
+        const existing = await pool.query("SELECT id FROM users WHERE LOWER(email) = $1", [email]);
         if (existing.rows.length === 0) {
             // Same generic message whether or not the account exists, so we
             // don't leak which emails are registered.
@@ -234,7 +235,7 @@ const forgotPasswordInitiate = async (req, res) => {
         }
 
         // Generate 6-digit OTP
-        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        const otp = randomInt(100000, 1000000).toString();
 
         // Expires in 10 minutes
         const expiresAt = new Date(Date.now() + 10 * 60000);
@@ -294,7 +295,7 @@ const resetPassword = async (req, res) => {
 
         // OTP is valid, hash and update the password
         const hashedPassword = await bcrypt.hash(newPassword, 10);
-        await pool.query("UPDATE users SET password = $1 WHERE email = $2", [hashedPassword, email]);
+        await pool.query("UPDATE users SET password = $1 WHERE LOWER(email) = $2", [hashedPassword, email]);
 
         // Delete the OTP record so it can't be reused
         await pool.query("DELETE FROM password_reset_otp WHERE email = $1", [email]);

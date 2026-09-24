@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 
 // Styles
 import { GLOBAL_CSS } from "./styles/theme";
@@ -20,6 +20,7 @@ import { FacilitiesPage }  from "./pages/FacilitiesPage";
 import { NewsPage }        from "./pages/NewsPage";
 import { ServicesPage }    from "./pages/ServicesPage";
 import { ContactPage }     from "./pages/ContactPage";
+import { DocumentationPage } from "./pages/DocumentationPage";
 
 // Portal
 import { PortalSidebar, PortalHeader } from "./portal/PortalLayout";
@@ -46,11 +47,13 @@ function restoreSession() {
     if (!storedUser) return { role: null, tab: "overview" };
 
     const parsedUser = JSON.parse(storedUser);
-    const role = parsedUser.role;
+    const role = parsedUser?.role;
+    const token = localStorage.getItem("token");
+    const payload = token ? JSON.parse(atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/"))) : null;
 
     // Guard: if the stored role is not one of our known roles, wipe the
     // session so the user has to log in again with fresh data.
-    if (!VALID_ROLES.includes(role)) {
+    if (!VALID_ROLES.includes(role) || !payload?.exp || payload.exp * 1000 <= Date.now()) {
       localStorage.removeItem("token");
       localStorage.removeItem("user");
       return { role: null, tab: "overview" };
@@ -58,6 +61,8 @@ function restoreSession() {
 
     return { role, tab: getDefaultTab(role) };
   } catch (error) {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
     console.error("Failed to restore session", error);
     return { role: null, tab: "dashboard" };
   }
@@ -76,8 +81,9 @@ function PublicPage({ section, setSection, setShowBooking, setShowLogin }) {
     case "projects":     return <ProjectsPage />;
     case "publications": return <PublicationsPage />;
     case "people":       return <PeoplePage />;
-    case "facilities":   return <FacilitiesPage  setShowBooking={setShowBooking} />;
+    case "facilities":   return <FacilitiesPage />;
     case "news":         return <NewsPage />;
+    case "documentation":return <DocumentationPage />;
     case "services":     return <ServicesPage    setShowBooking={setShowBooking} />;
     case "contact":      return <ContactPage />;
     default:             return <HomePage {...shared} />;
@@ -115,8 +121,15 @@ export default function App() {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     setUserRole(null);
+    setShowBooking(false);
     setSection("home");
   }, []);
+
+  useEffect(() => {
+    const expired = () => { handleLogout(); setShowLogin(true); };
+    window.addEventListener("session-expired", expired);
+    return () => window.removeEventListener("session-expired", expired);
+  }, [handleLogout]);
 
   if (userRole) {
     return (

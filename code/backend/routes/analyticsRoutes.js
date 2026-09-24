@@ -3,7 +3,7 @@ const router = express.Router();
 const { getAnalytics } = require("../controllers/analyticsController");
 const { verifyToken, requireRole } = require("../middleware/authMiddleware");
 
-// Admin-only analytics endpoint
-router.get("/", verifyToken, requireRole("admin"), getAnalytics);
+// Admin/Officer analytics endpoint
+router.get("/", verifyToken, requireRole("admin", "officer"), getAnalytics);
 
 module.exports = router;
