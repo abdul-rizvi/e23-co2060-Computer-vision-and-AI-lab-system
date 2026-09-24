@@ -4,7 +4,7 @@ import { T } from "../styles/theme";
 import { Badge, Button, Card, Divider, SectionLabel, SectionTitle } from "../components/UI";
 import { renderIcon } from "../components/iconUtils";
 import { RESEARCH_AREAS, PROJECTS, PUBLICATIONS, NEWS_ITEMS, SERVICES, HERO_SLIDES, ICONS } from "../data/labData";
-import { getNews } from "../services/api";
+import { getNews, getProjects } from "../services/api";
 
 function formatNewsDate(value) {
   if (!value) return "";
@@ -222,13 +222,13 @@ function ServicesBand({ setShowLogin }) {
   );
 }
 
-function ProjectsColumn({ setSection }) {
+function ProjectsColumn({ setSection, projects }) {
   return (
     <div>
       <SectionLabel text="Projects" />
       <SectionTitle>Active research projects</SectionTitle>
       <Divider />
-      {PROJECTS.filter((project) => project.status === "Active").map((project) => (
+      {projects.filter((project) => project.status === "Active").map((project) => (
         <div key={project.title} style={{ padding: "0 0 1rem", marginBottom: "1rem", borderBottom: `1px solid ${T.border}` }}>
           <div style={{ display: "flex", alignItems: "center", gap: ".6rem", marginBottom: ".45rem", flexWrap: "wrap" }}>
             <Badge label={project.status} />
@@ -314,6 +314,7 @@ function NewsTicker({ news }) {
 
 export function HomePage({ setSection, setShowLogin }) {
   const [news, setNews] = useState(NEWS_ITEMS);
+  const [projects, setProjects] = useState(PROJECTS);
 
   useEffect(() => {
     let cancelled = false;
@@ -326,7 +327,16 @@ export function HomePage({ setSection, setShowLogin }) {
         console.error("Failed to load news", error);
       }
     };
+    const fetchProjects = async () => {
+      try {
+        const response = await getProjects();
+        if (!cancelled) setProjects(response.data);
+      } catch (error) {
+        console.error("Failed to load projects", error);
+      }
+    };
     fetchNews();
+    fetchProjects();
     return () => { cancelled = true; };
   }, []);
 
@@ -342,7 +352,7 @@ export function HomePage({ setSection, setShowLogin }) {
       <ResearchSection setSection={setSection} />
       <div className="section-padding">
         <div className="page-shell" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2rem" }}>
-          <ProjectsColumn setSection={setSection} />
+          <ProjectsColumn setSection={setSection} projects={projects} />
           <PublicationsColumn setSection={setSection} />
         </div>
       </div>
