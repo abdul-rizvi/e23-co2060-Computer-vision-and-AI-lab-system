@@ -8,8 +8,20 @@ dotenv.config();
 
 // Create Express app
 const app = express();
-// Allowed all origins for local development flexibility
-app.use(cors());
+// Restrict CORS to known frontend origins
+const allowedOrigins = [
+    process.env.PORTAL_URL || "http://localhost:5173",
+    "http://localhost:5173",
+    "http://localhost:5174",
+].filter(Boolean);
+app.use(cors({
+    origin: (origin, callback) => {
+        // Allow requests with no origin (e.g. server-to-server, curl)
+        if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
+        callback(new Error("Not allowed by CORS"));
+    },
+    credentials: true,
+}));
 app.use(express.json());
 
 // Health Check for Deployment

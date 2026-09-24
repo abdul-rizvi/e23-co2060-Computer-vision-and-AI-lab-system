@@ -118,7 +118,7 @@ function RescheduleModal({ open, booking, onClose, onSaved }) {
     <Modal title="Reschedule Reservation" subtitle={`Update date and time for reservation #${booking.id}`} onClose={onClose} maxWidth={500}>
       {error && <div style={{ marginBottom: "1rem", padding: ".85rem .95rem", borderRadius: 14, background: `${T.danger}10`, border: `1px solid ${T.danger}26`, color: T.danger, fontSize: ".84rem" }}>{error}</div>}
       <Field label="New Date" type="date" value={form.booking_date} onChange={set("booking_date")} />
-      <Field label="New Time Slot" value={form.time_slot} onChange={set("time_slot")} options={["08:00–10:00", "10:00–12:00", "13:00–15:00", "15:00–17:00"]} />
+      <Field label="New Time Slot" value={form.time_slot} onChange={set("time_slot")} options={["08:00–10:00", "10:00–12:00", "13:00–15:00", "15:00–17:00", "17:00–19:00"]} />
       <Field label="Admin Notes / Reason" value={form.admin_notes} onChange={set("admin_notes")} rows={3} placeholder="Provide a reason for rescheduling..." />
       <div style={{ display: "flex", gap: ".75rem", justifyContent: "flex-end" }}>
         <Button variant="outline" onClick={onClose} disabled={saving}>Cancel</Button>
