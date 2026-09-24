@@ -107,13 +107,13 @@ const updateBookingStatus = async (req, res) => {
         const existingBooking = existingResult.rows[0];
 
         if (status === "Approved") {
-            const finalDate = booking_date || existingBooking.booking_date;
-            const finalTime = time_slot || existingBooking.time_slot;
-
             const conflictCheck = await pool.query(
                 `SELECT id FROM reservations 
-                 WHERE resource = $1 AND booking_date = $2 AND time_slot = $3 AND LOWER(status) = 'approved' AND id != $4`,
-                [existingBooking.resource, finalDate, finalTime, id]
+                 WHERE resource = $1 
+                 AND booking_date = COALESCE($2, (SELECT booking_date FROM reservations WHERE id = $4)) 
+                 AND time_slot = COALESCE($3, (SELECT time_slot FROM reservations WHERE id = $4)) 
+                 AND LOWER(status) = 'approved' AND id != $4`,
+                [existingBooking.resource, booking_date || null, time_slot || null, id]
             );
 
             if (conflictCheck.rows.length > 0) {
