@@ -643,7 +643,7 @@ function UsersSection() {
   );
 }
 
-function PeopleModal({ open, initial, onClose, onSaved }) {
+function PeopleModal({ open, initial, onClose, onSaved, nextOrder }) {
   const isEdit = Boolean(initial?.id);
   const [form, setForm] = useState({ name: "", title: "", dept: "", research: "", type: "staff", sort_order: "0" });
   const [saving, setSaving] = useState(false);
@@ -657,7 +657,7 @@ function PeopleModal({ open, initial, onClose, onSaved }) {
         dept: initial?.dept || "",
         research: initial?.research || "",
         type: initial?.type || "staff",
-        sort_order: String(initial?.sort_order ?? 0),
+        sort_order: String(initial?.sort_order ?? nextOrder ?? 1),
       });
       setSaving(false);
       setError("");
@@ -769,6 +769,8 @@ function PeopleSection() {
     </div>,
   ]);
 
+  const nextOrder = rows.length > 0 ? Math.max(...rows.map((r) => Number(r.sort_order) || 0)) + 1 : 1;
+
   return (
     <SectionFrame
       title="Staff & People"
@@ -777,7 +779,7 @@ function PeopleSection() {
     >
       {error && <div style={{ marginBottom: "1rem", padding: ".85rem .95rem", borderRadius: 14, background: `${T.danger}10`, border: `1px solid ${T.danger}26`, color: T.danger, fontSize: ".84rem" }}>{error}</div>}
       {loading ? <Card style={{ padding: "1.2rem", color: T.textMid }}>Loading people…</Card> : rows.length === 0 ? <EmptyState title="No people records" desc="Add a staff member or student profile to populate the public directory." /> : <PTable cols={["Name", "Title", "Department", "Research", "Type", "Order", "Actions"]} rows={tableRows} />}
-      <PeopleModal open={modalOpen} initial={editing} onClose={() => setModalOpen(false)} onSaved={load} />
+      <PeopleModal open={modalOpen} initial={editing} onClose={() => setModalOpen(false)} onSaved={load} nextOrder={nextOrder} />
       {deleteTarget && (
         <ConfirmModal
           title={`Delete directory entry: ${deleteTarget.name}`}
