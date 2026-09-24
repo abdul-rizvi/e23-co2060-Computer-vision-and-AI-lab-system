@@ -78,7 +78,7 @@ export function Field({ label, type = "text", value, onChange, onKeyDown, option
             <option value="">Select an option</option>
             {options.map(option => {
               const opt = typeof option === "string" ? { value: option, label: option } : option;
-              return <option key={opt.value} value={opt.value}>{opt.label}</option>;
+              return <option key={opt.value} value={opt.value} disabled={opt.disabled}>{opt.label}</option>;
             })}
           </select>
         </div>

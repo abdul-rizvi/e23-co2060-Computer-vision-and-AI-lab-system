@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import { LuCamera, LuClock3, LuQrCode, LuUpload, LuDownload, LuFileText } from "react-icons/lu";
 import { T } from "../styles/theme";
 import { Badge, Button, Card, Field, PTable } from "../components/UI";
-import { getItems, createBooking, getMyBookings, getNews } from "../services/api";
+import { getItems, createBooking, getMyBookings, getNews, getUnavailableSlots } from "../services/api";
 import { bookingsToCSV, bookingQRUrl } from "../utils/bookingExport";
 
 function QRPassModal({ booking, onClose }) {
@@ -38,10 +38,13 @@ function QRPassModal({ booking, onClose }) {
 
 
 function BookingForm() {
+  const ALL_SLOTS = ["08:00–10:00", "10:00–12:00", "13:00–15:00", "15:00–17:00"];
   const [options, setOptions] = useState(["High Performance Server", "Training Run (A100)", "Consultation - CV Methodology", "Lab Space Access"]);
   const [form, setForm] = useState({ resource: "", date: "", time: "", purpose: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [dateError, setDateError] = useState("");
+  const [unavailableSlots, setUnavailableSlots] = useState([]);
+  const [loadingSlots, setLoadingSlots] = useState(false);
 
   const todayStr = new Date().toLocaleDateString("en-CA"); 
 
@@ -57,6 +60,31 @@ function BookingForm() {
     };
     fetchResources();
   }, []);
+
+  // Fetch unavailable slots whenever resource or date changes
+  useEffect(() => {
+    const fetchSlots = async () => {
+      if (!form.resource || !form.date) {
+        setUnavailableSlots([]);
+        return;
+      }
+      setLoadingSlots(true);
+      try {
+        const response = await getUnavailableSlots(form.resource, form.date);
+        setUnavailableSlots(response.data || []);
+        // If the currently selected time is now unavailable, clear it
+        if (form.time && (response.data || []).includes(form.time)) {
+          setForm(prev => ({ ...prev, time: "" }));
+        }
+      } catch (error) {
+        console.error("Failed to fetch unavailable slots:", error);
+        setUnavailableSlots([]);
+      } finally {
+        setLoadingSlots(false);
+      }
+    };
+    fetchSlots();
+  }, [form.resource, form.date]);
 
   const set = (key) => (e) => setForm((value) => ({ ...value, [key]: e.target.value }));
 
@@ -100,6 +128,13 @@ function BookingForm() {
     }
   };
 
+  // Build time slot options with grayed-out unavailable ones
+  const timeSlotOptions = ALL_SLOTS.map(slot => ({
+    value: slot,
+    label: unavailableSlots.includes(slot) ? `${slot} — Booked` : slot,
+    disabled: unavailableSlots.includes(slot),
+  }));
+
   return (
     <div className="fade-up">
       <h2 style={{ margin: 0, fontSize: "1.35rem", color: T.navyDark, marginBottom: ".35rem" }}>Resource booking request</h2>
@@ -116,7 +151,13 @@ function BookingForm() {
           error={dateError}
           helperText="Monday – Friday only. Weekends are unavailable."
         />
-        <Field label="Time slot" value={form.time} onChange={set("time")} options={["08:00–10:00", "10:00–12:00", "13:00–15:00", "15:00–17:00"]} icon={LuClock3} />
+        <Field label="Time slot" value={form.time} onChange={set("time")} options={timeSlotOptions} icon={LuClock3} />
+        {loadingSlots && <div style={{ color: T.textLight, fontSize: ".8rem", marginBottom: ".5rem" }}>Checking availability…</div>}
+        {unavailableSlots.length > 0 && !loadingSlots && (
+          <div style={{ color: T.gold, fontSize: ".8rem", marginBottom: ".5rem" }}>
+            ⚠ {unavailableSlots.length} time slot{unavailableSlots.length > 1 ? "s" : ""} already booked for this resource on this date.
+          </div>
+        )}
         <Field label="Purpose / notes" rows={3} value={form.purpose} onChange={set("purpose")} placeholder="Describe your intended use..." />
         <Button variant="primary" icon={LuUpload} fullWidth onClick={handleSubmit} disabled={isSubmitting || !!dateError}>{isSubmitting ? "Submitting…" : "Submit request"}</Button>
       </Card>

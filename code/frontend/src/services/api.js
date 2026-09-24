@@ -35,6 +35,7 @@ export const createBooking = (data) => API.post("/api/bookings", data);
 export const getMyBookings = () => API.get("/api/bookings", { params: { mine: true } });
 export const getBookings = () => API.get("/api/bookings");
 export const updateBookingStatus = (id, data) => API.put(`/api/bookings/${id}/status`, data);
+export const getUnavailableSlots = (resource, date) => API.get("/api/bookings/unavailable-slots", { params: { resource, date } });
 
 export const getUsers = () => API.get("/api/users");
 export const createUser = (data) => API.post("/api/users", data);

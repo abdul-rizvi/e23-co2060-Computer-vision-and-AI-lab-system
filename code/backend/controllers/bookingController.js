@@ -175,4 +175,23 @@ const updateBookingStatus = async (req, res) => {
     }
 };
 
-module.exports = { createBooking, getBookings, updateBookingStatus };
+// 4. Get unavailable (already approved) time slots for a resource on a given date
+const getUnavailableSlots = async (req, res) => {
+    try {
+        const { resource, date } = req.query;
+        if (!resource || !date) {
+            return res.status(400).json({ message: "Resource and date are required" });
+        }
+        const result = await pool.query(
+            `SELECT DISTINCT time_slot FROM reservations 
+             WHERE resource = $1 AND booking_date = $2 AND LOWER(status) = 'approved'`,
+            [resource, date]
+        );
+        res.json(result.rows.map(r => r.time_slot));
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Error fetching unavailable slots" });
+    }
+};
+
+module.exports = { createBooking, getBookings, updateBookingStatus, getUnavailableSlots };
