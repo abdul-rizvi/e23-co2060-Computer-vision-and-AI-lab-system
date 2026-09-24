@@ -4,6 +4,7 @@ DROP TABLE IF EXISTS projects;
 DROP TABLE IF EXISTS people;
 DROP TABLE IF EXISTS reservations;
 DROP TABLE IF EXISTS inventory;
+DROP TABLE IF EXISTS otp_verifications;
 DROP TABLE IF EXISTS password_reset_otp;
 DROP TABLE IF EXISTS users;
 
@@ -74,7 +75,15 @@ CREATE TABLE password_reset_otp (
     expires_at TIMESTAMP NOT NULL
 );
 
--- 7. Projects Table
+-- 7. OTP Verifications Table (for registration flow)
+CREATE TABLE otp_verifications (
+    email VARCHAR(200) PRIMARY KEY,
+    otp VARCHAR(6) NOT NULL,
+    user_data JSONB NOT NULL,
+    expires_at TIMESTAMP NOT NULL
+);
+
+-- 8. Projects Table
 CREATE TABLE projects (
     id SERIAL PRIMARY KEY,
     title VARCHAR(150) NOT NULL,
