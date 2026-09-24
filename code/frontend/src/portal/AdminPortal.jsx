@@ -304,7 +304,7 @@ function ReservationsSection() {
     fmtDate(booking.booking_date || booking.date),
     booking.time_slot || booking.time || "—",
     <BookingStatusBadge key={`status-${booking.id}`} status={booking.status} />,
-    ["pending", "rescheduled", "approved"].includes(String(booking.status).toLowerCase()) ? (
+    ["pending", "rescheduled"].includes(String(booking.status).toLowerCase()) ? (
       <div key={`actions-${booking.id}`} style={{ display: "flex", gap: ".45rem", flexWrap: "wrap" }}>
         <Button variant="primary" size="sm" icon={LuCheck} onClick={() => handleAction(booking.id, "Approved")} disabled={actionId === booking.id}>Approve</Button>
         <Button variant="outline" size="sm" icon={LuCalendarDays} onClick={() => setRescheduleTarget(booking)} disabled={actionId === booking.id}>Reschedule</Button>

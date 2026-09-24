@@ -181,7 +181,7 @@ function BookingRequestsSection() {
       label={booking.status || "Pending"}
       tone={isPending(booking.status) ? "Pending" : String(booking.status).toLowerCase() === "approved" ? "Active" : booking.status === "Rescheduled" ? "Rescheduled" : "Rejected"}
     />,
-    ["pending", "rescheduled", "approved"].includes(String(booking.status).toLowerCase()) ? (
+    ["pending", "rescheduled"].includes(String(booking.status).toLowerCase()) ? (
       <div key={`act-${booking.id}`} style={{ display: "flex", gap: ".45rem", flexWrap: "wrap" }}>
         <Button variant="primary" size="sm" icon={LuCheck} onClick={() => handleAction(booking.id, "Approved")} disabled={actionId === booking.id}>Approve</Button>
         <Button variant="outline" size="sm" icon={LuCalendarDays} onClick={() => setRescheduleTarget(booking)} disabled={actionId === booking.id}>Reschedule</Button>
