@@ -9,7 +9,7 @@
 ![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
 
-> A unified web platform for the **Computer Vision & AI Lab** — combining a dynamic public research portfolio with a secure internal management system for equipment bookings and GPU resource scheduling.
+> A unified web platform for the **Computer Vision & AI Lab** — combining a dynamic public research portfolio with a secure internal management system for equipment bookings and GPU resource schedulingg.
 
 [🐛 Report Bug](https://github.com/cepdnaclk/e23-co2060-Computer-vision-and-AI-lab-system/issues) · [✨ Request Feature](https://github.com/cepdnaclk/e23-co2060-Computer-vision-and-AI-lab-system/issues)
 
