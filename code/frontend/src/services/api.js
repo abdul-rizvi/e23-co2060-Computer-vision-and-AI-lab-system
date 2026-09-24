@@ -56,4 +56,6 @@ export const createProject = (data) => API.post("/api/projects", data);
 export const updateProject = (id, data) => API.put(`/api/projects/${id}`, data);
 export const deleteProject = (id) => API.delete(`/api/projects/${id}`);
 
+export const submitContactMessage = (data) => API.post("/api/contact", data);
+
 export default API;

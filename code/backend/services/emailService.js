@@ -271,6 +271,41 @@ const sendPasswordResetOtpEmail = async (email, otp) => {
     }
 };
 
+const sendContactEmail = async (name, senderEmail, subject, message) => {
+    try {
+        const mailOptions = {
+            from: process.env.EMAIL_USER,
+            to: ["aicvlaboratory843@gmail.com", senderEmail],
+            subject: `Contact Form: ${subject}`,
+            html: `
+                <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 12px; padding: 24px;">
+                    <h2 style="color: #1a3a52; margin-top: 0;">New Contact Form Submission</h2>
+                    <p><strong>Name:</strong> ${name}</p>
+                    <p><strong>Email:</strong> ${senderEmail}</p>
+                    <p><strong>Subject:</strong> ${subject}</p>
+                    
+                    <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin: 24px 0; border: 1px solid #e2e8f0; white-space: pre-wrap;">
+                        ${message}
+                    </div>
+                    
+                    <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;" />
+                    <p style="color: #94a3b8; font-size: 12px; margin: 0;">
+                        This is an automated copy of your message sent via the CV & AI Laboratory Contact Form.<br>
+                        University of Peradeniya
+                    </p>
+                </div>
+            `,
+        };
+
+        await transporter.sendMail(mailOptions);
+        console.log(`✓ Contact email sent from ${senderEmail}`);
+        return true;
+    } catch (error) {
+        console.error("Failed to send contact email:", error);
+        return false;
+    }
+};
+
 module.exports = {
     sendRegistrationEmail,
     sendBookingConfirmationEmail,
@@ -278,4 +313,5 @@ module.exports = {
     sendAdminNotificationEmail,
     sendOtpEmail,
     sendPasswordResetOtpEmail,
+    sendContactEmail,
 };

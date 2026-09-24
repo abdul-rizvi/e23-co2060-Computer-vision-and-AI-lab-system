@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { LuMail, LuMapPin, LuPhone, LuClock3, LuSend } from "react-icons/lu";
 import { T } from "../styles/theme";
 import { Button, Card, Divider, Field, SectionLabel, SectionTitle } from "../components/UI";
 import { renderIcon } from "../components/iconUtils";
+import { submitContactMessage } from "../services/api";
 
 const CONTACT_INFO = [
   { icon: LuMapPin, label: "Address", value: "Building D, Floor 3\nFaculty of Engineering\nUniversity of Peradeniya\nPeradeniya 20400, Sri Lanka" },
@@ -19,6 +21,29 @@ const SUBJECT_OPTIONS = [
 ];
 
 export function ContactPage() {
+  const [form, setForm] = useState({ name: "", email: "", subject: SUBJECT_OPTIONS[0], message: "" });
+  const [status, setStatus] = useState({ loading: false, error: null, success: false });
+
+  const handleChange = (key) => (e) => {
+    setForm(prev => ({ ...prev, [key]: e.target.value }));
+  };
+
+  const handleSubmit = async () => {
+    if (!form.name || !form.email || !form.message) {
+      setStatus({ loading: false, error: "Please fill in all required fields.", success: false });
+      return;
+    }
+    try {
+      setStatus({ loading: true, error: null, success: false });
+      await submitContactMessage(form);
+      setStatus({ loading: false, error: null, success: true });
+      setForm({ name: "", email: "", subject: SUBJECT_OPTIONS[0], message: "" });
+      setTimeout(() => setStatus(prev => ({ ...prev, success: false })), 5000);
+    } catch (err) {
+      setStatus({ loading: false, error: err.response?.data?.message || "Failed to send message.", success: false });
+    }
+  };
+
   return (
     <div className="page-shell section-padding">
       <SectionLabel text="Contact" />
@@ -42,11 +67,17 @@ export function ContactPage() {
             <div style={{ color: T.gold, fontSize: ".72rem", fontWeight: 700, letterSpacing: ".12em", textTransform: "uppercase" }}>Send a message</div>
             <div style={{ color: T.navyDark, fontWeight: 700, marginTop: ".35rem" }}>Contact the laboratory office</div>
           </div>
-          <Field label="Full name" placeholder="Your full name" />
-          <Field label="Email address" type="email" placeholder="your@email.com" />
-          <Field label="Subject" options={SUBJECT_OPTIONS} />
-          <Field label="Message" rows={5} placeholder="Write your message here..." />
-          <Button variant="primary" icon={LuSend} fullWidth>Send message</Button>
+          <Field label="Full name" placeholder="Your full name" value={form.name} onChange={handleChange("name")} />
+          <Field label="Email address" type="email" placeholder="your@email.com" value={form.email} onChange={handleChange("email")} />
+          <Field label="Subject" options={SUBJECT_OPTIONS} value={form.subject} onChange={handleChange("subject")} />
+          <Field label="Message" rows={5} placeholder="Write your message here..." value={form.message} onChange={handleChange("message")} />
+          
+          {status.error && <div style={{ color: T.danger, fontSize: "0.85rem", marginBottom: "1rem" }}>{status.error}</div>}
+          {status.success && <div style={{ color: T.success, fontSize: "0.85rem", marginBottom: "1rem" }}>Message sent successfully! A copy has been sent to your email.</div>}
+
+          <Button variant="primary" icon={LuSend} fullWidth onClick={handleSubmit} disabled={status.loading}>
+            {status.loading ? "Sending..." : "Send message"}
+          </Button>
         </Card>
       </div>
     </div>
