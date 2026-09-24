@@ -18,6 +18,17 @@ const createBooking = async (req, res) => {
         const user = userResult.rows[0];
         if (!user) return res.status(401).json({ message: "Account no longer exists. Please sign in again." });
 
+        // Check for overlapping approved bookings
+        const conflictCheck = await pool.query(
+            `SELECT id FROM reservations 
+             WHERE resource = $1 AND booking_date = $2 AND time_slot = $3 AND LOWER(status) = 'approved'`,
+            [resource, date, time]
+        );
+
+        if (conflictCheck.rows.length > 0) {
+            return res.status(409).json({ message: "This resource is already booked and approved for the selected date and time slot." });
+        }
+
         const result = await pool.query(
             `INSERT INTO reservations 
             (user_id, request_type, resource, booking_date, time_slot, purpose, status) 
@@ -87,6 +98,27 @@ const updateBookingStatus = async (req, res) => {
         if (status === "Rescheduled" || booking_date || time_slot) {
             const scheduleError = validateSchedule(booking_date, time_slot);
             if (scheduleError) return res.status(400).json({ message: scheduleError });
+        }
+
+        const existingResult = await pool.query("SELECT * FROM reservations WHERE id = $1", [id]);
+        if (existingResult.rows.length === 0) {
+            return res.status(404).json({ message: "Booking not found" });
+        }
+        const existingBooking = existingResult.rows[0];
+
+        if (status === "Approved") {
+            const finalDate = booking_date || existingBooking.booking_date;
+            const finalTime = time_slot || existingBooking.time_slot;
+
+            const conflictCheck = await pool.query(
+                `SELECT id FROM reservations 
+                 WHERE resource = $1 AND booking_date = $2 AND time_slot = $3 AND LOWER(status) = 'approved' AND id != $4`,
+                [existingBooking.resource, finalDate, finalTime, id]
+            );
+
+            if (conflictCheck.rows.length > 0) {
+                return res.status(409).json({ message: "Conflict: Another approved booking already exists for this resource at this time." });
+            }
         }
 
         let query = "UPDATE reservations SET status = $1";
