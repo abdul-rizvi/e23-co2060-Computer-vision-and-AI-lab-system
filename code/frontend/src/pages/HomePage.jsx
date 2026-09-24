@@ -3,7 +3,7 @@ import { LuArrowRight, LuCalendarClock, LuFlaskConical, LuUsers, LuWrench, LuBel
 import { T } from "../styles/theme";
 import { Badge, Button, Card, Divider, SectionLabel, SectionTitle } from "../components/UI";
 import { renderIcon } from "../components/iconUtils";
-import { RESEARCH_AREAS, PROJECTS, PUBLICATIONS, NEWS_ITEMS, SERVICES, HERO_SLIDES, ICONS } from "../data/labData";
+import { RESEARCH_AREAS, PROJECTS, PUBLICATIONS, NEWS_ITEMS, SERVICES, HERO_SLIDES, ICONS, PEOPLE } from "../data/labData";
 import { getNews, getProjects } from "../services/api";
 
 function formatNewsDate(value) {
@@ -55,8 +55,8 @@ function HeroSlider({ setSection, setShowLogin }) {
           </div>
           <div style={{ display: "grid", gap: ".75rem" }}>
             {[
-              ["Publications", "47+", LuBellRing],
-              ["Researchers", "23", LuUsers],
+              ["Publications", String(PUBLICATIONS.length), LuBellRing],
+              ["Researchers", String(PEOPLE.length), LuUsers],
               ["Facilities", "6", LuWrench],
             ].map(([label, value, Icon]) => (
               <div key={label} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: ".9rem 1rem", borderRadius: 16, background: "rgba(255,255,255,.08)", border: "1px solid rgba(255,255,255,.1)" }}>
@@ -108,7 +108,7 @@ function QuickLinks({ setShowLogin }) {
   );
 }
 
-function AboutSection({ setSection }) {
+function AboutSection({ setSection, projects }) {
   const points = [
     { title: "Mission", desc: "Design AI systems that are reliable, understandable, and rooted in real lab workflows.", icon: ICONS.about },
     { title: "Focus", desc: "Computer vision, autonomous systems, and medical imaging with strong engineering discipline.", icon: ICONS.research },
@@ -146,7 +146,7 @@ function AboutSection({ setSection }) {
         </div>
         <Card style={{ padding: "1.25rem" }}>
           <div style={{ color: T.gold, fontSize: ".72rem", fontWeight: 700, letterSpacing: ".12em", textTransform: "uppercase", marginBottom: "1rem" }}>Lab snapshot</div>
-          {[["Publications", "47+"], ["Active projects", "12"], ["Researchers & students", "23"], ["Equipment categories", "6"], ["Partner institutions", "3"]].map(([label, value]) => (
+          {[["Publications", String(PUBLICATIONS.length)], ["Active projects", String(projects ? projects.filter(p => p.status === "Active").length : 0)], ["Researchers & students", String(PEOPLE.length)], ["Equipment categories", "6"], ["Partner institutions", "3"]].map(([label, value]) => (
             <div key={label} style={{ display: "flex", justifyContent: "space-between", gap: "1rem", padding: ".9rem 0", borderBottom: `1px solid ${T.border}` }}>
               <span style={{ color: T.textMid, fontSize: ".9rem" }}>{label}</span>
               <span style={{ color: T.navyDark, fontWeight: 700 }}>{value}</span>
@@ -348,7 +348,7 @@ export function HomePage({ setSection, setShowLogin }) {
         </div>
       </div>
       <QuickLinks setShowLogin={setShowLogin} />
-      <AboutSection setSection={setSection} />
+      <AboutSection setSection={setSection} projects={projects} />
       <ResearchSection setSection={setSection} />
       <div className="section-padding">
         <div className="page-shell" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2rem" }}>

@@ -2,6 +2,7 @@ import { LuMapPin, LuUsers, LuFlaskConical, LuShieldCheck } from "react-icons/lu
 import { T } from "../styles/theme";
 import { Card, Divider, SectionLabel, SectionTitle } from "../components/UI";
 import { renderIcon } from "../components/iconUtils";
+import { PUBLICATIONS, PROJECTS, PEOPLE } from "../data/labData";
 import { ICONS } from "../data/labData";
 
 export function AboutPage() {
@@ -40,7 +41,7 @@ export function AboutPage() {
 
         <Card style={{ padding: "1.25rem" }}>
           <div style={{ color: T.gold, fontSize: ".72rem", fontWeight: 700, letterSpacing: ".12em", textTransform: "uppercase", marginBottom: "1rem" }}>Lab snapshot</div>
-          {[["Publications", "47+"], ["Active projects", "12"], ["Researchers & students", "23"], ["GPU nodes", "8"], ["Equipment categories", "6"], ["Partner institutions", "3"]].map(([label, value]) => (
+          {[["Publications", String(PUBLICATIONS.length)], ["Active projects", String(PROJECTS.filter(p => p.status === 'Active').length)], ["Researchers & students", String(PEOPLE.length)], ["GPU nodes", "8"], ["Equipment categories", "6"], ["Partner institutions", "3"]].map(([label, value]) => (
             <div key={label} style={{ display: "flex", justifyContent: "space-between", gap: "1rem", padding: ".9rem 0", borderBottom: `1px solid ${T.border}` }}>
               <span style={{ color: T.textMid, fontSize: ".9rem" }}>{label}</span>
               <span style={{ color: T.navyDark, fontWeight: 700 }}>{value}</span>

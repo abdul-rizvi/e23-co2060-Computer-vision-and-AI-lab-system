@@ -3,6 +3,7 @@ import { T } from "../styles/theme";
 import labLogo from "../assets/lab-logo.png";
 import { Button } from "./UI";
 import { renderIcon } from "./iconUtils";
+import { PUBLICATIONS, PROJECTS, PEOPLE } from "../data/labData";
 
 const NAV_ITEMS = [
   { id: "home", label: "Home", icon: LuHouse },
@@ -52,7 +53,7 @@ export function LogoBar() {
           <div style={{ color: "rgba(255,255,255,.7)", fontSize: ".84rem", marginTop: ".35rem" }}>University of Peradeniya, Sri Lanka</div>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(88px, 1fr))", gap: ".65rem", width: "100%", maxWidth: 410 }}>
-          {[["47+", "Publications"], ["12", "Active Projects"], ["23", "Researchers"]].map(([value, label]) => (
+          {[[String(PUBLICATIONS.length), "Publications"], [String(PROJECTS.filter(p => p.status === 'Active').length), "Active Projects"], [String(PEOPLE.length), "Researchers"]].map(([value, label]) => (
             <div key={label} className="hero-card" style={{ padding: ".8rem .95rem", borderRadius: 16, textAlign: "center" }}>
               <div style={{ color: T.gold, fontSize: "1.1rem", fontWeight: 800, lineHeight: 1 }}>{value}</div>
               <div style={{ color: "rgba(255,255,255,.7)", fontSize: ".7rem", marginTop: ".25rem" }}>{label}</div>
