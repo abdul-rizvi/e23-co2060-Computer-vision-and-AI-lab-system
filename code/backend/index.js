@@ -10,9 +10,10 @@ dotenv.config();
 const app = express();
 // Restrict CORS to known frontend origins
 const allowedOrigins = [
-    process.env.PORTAL_URL || "http://localhost:5173",
+    process.env.PORTAL_URL ? process.env.PORTAL_URL.replace(/\/$/, "") : "http://localhost:5173",
     "http://localhost:5173",
     "http://localhost:5174",
+    "https://e23-co2060-computer-vision-and-ai-l.vercel.app"
 ].filter(Boolean);
 app.use(cors({
     origin: (origin, callback) => {
